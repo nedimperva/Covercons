@@ -46,29 +46,29 @@ export default function SVGToImage(settings: SvgToImageSettings) {
 
     const image = new Image();
 
-    image.onload = function () {
-      let finalWidth, finalHeight;
+    image.onload = () => {
+      let finalWidth: number = 0, finalHeight: number = 0;
 
       // Calculate width if set to auto and the height is specified (to preserve aspect ratio)
       if (_settings.width === "auto" && _settings.height !== "auto") {
-        finalWidth = (this.width / this.height) * _settings.height;
-        // Use image original width
+        finalWidth = ((image as HTMLImageElement).width / (image as HTMLImageElement).height) * (Number(_settings.height) as number);
+      // Use image original width
       } else if (_settings.width === "auto") {
-        finalWidth = this.naturalWidth;
+        finalWidth = (image as HTMLImageElement).naturalWidth;
         // Use custom width
       } else {
-        finalWidth = _settings.width;
+        finalWidth = Number(_settings.width);
       }
 
       // Calculate height if set to auto and the width is specified (to preserve aspect ratio)
       if (_settings.height === "auto" && _settings.width !== "auto") {
-        finalHeight = (this.height / this.width) * _settings.width;
-        // Use image original height
+        finalHeight = ((image as HTMLImageElement).height / (image as HTMLImageElement).width) * (Number(_settings.width) as number);
+      // Use image original height
       } else if (_settings.height === "auto") {
-        finalHeight = this.naturalHeight;
+        finalHeight = (image as HTMLImageElement).naturalHeight;
         // Use custom height
       } else {
-        finalHeight = _settings.height;
+        finalHeight = Number(_settings.height);
       }
 
       // Define the canvas intrinsic size
@@ -76,7 +76,7 @@ export default function SVGToImage(settings: SvgToImageSettings) {
       canvas.height = finalHeight;
 
       // Render image in the canvas
-      context.drawImage(this, 0, 0, finalWidth, finalHeight);
+      context.drawImage(image as HTMLImageElement, 0, 0, finalWidth, finalHeight);
 
       if (_settings.outputFormat == "blob") {
         // Fullfil and Return the Blob image

@@ -12,14 +12,14 @@ export async function POST(req: NextRequest) {
     });
     const pngData = resvg.render().asPng();
 
-    let buf = Buffer.from(pngData);
+    let buf: any = Buffer.from(pngData);
     let contentType = "image/png";
     if (format && format !== "png") {
       if (format === "webp") {
-        buf = await sharp(buf).webp({ quality: 95 }).toBuffer();
+        buf = await (sharp as any)(buf).webp({ quality: 95 }).toBuffer();
         contentType = "image/webp";
       } else if (format === "jpeg") {
-        buf = await sharp(buf).jpeg({ quality: 95 }).toBuffer();
+        buf = await (sharp as any)(buf).jpeg({ quality: 95 }).toBuffer();
         contentType = "image/jpeg";
       }
     }
@@ -36,4 +36,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: e?.message ?? "failed" }, { status: 500 });
   }
 }
-
