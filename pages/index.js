@@ -20,8 +20,17 @@ export default function Home() {
   // APPLICATION STATE
   const [svg, setSvg] = React.useState(null);
   const [bgColor, setBgColor] = React.useState({ hex: "#3A95FF" });
+  const [bgMode, setBgMode] = React.useState("solid"); // solid | gradient
+  const [bgGradient, setBgGradient] = React.useState({
+    from: { hex: "#3A95FF" },
+    to: { hex: "#6EE7F9" },
+    angle: 45,
+  });
   const [coverType, setCoverType] = React.useState("singlemiddleicon");
   const [generatedCoverSvg, setGeneratedCoverSvg] = React.useState("");
+  const [sizePreset, setSizePreset] = React.useState("notion");
+  const [canvasWidth, setCanvasWidth] = React.useState(1500);
+  const [canvasHeight, setCanvasHeight] = React.useState(600);
   const [iconPatternSpacing, setIconPatternSpacing] = React.useState(25);
   const [iconPatternSize, setIconPatternSize] = React.useState(2);
   const [iconPatternRotation, setIconPatternRotation] = React.useState(330);
@@ -31,6 +40,11 @@ export default function Home() {
   const [selectedIconVersion, setSelectedIconVersion] = React.useState(1);
   const [selectedIconType, setSelectedIconType] =
     React.useState("materialicons");
+  const [titleText, setTitleText] = React.useState("");
+  const [titleColor, setTitleColor] = React.useState({ hex: "#ffffff" });
+  const [titleSize, setTitleSize] = React.useState(64);
+  const [titleXAlign, setTitleXAlign] = React.useState("center"); // left|center|right
+  const [titleYPosition, setTitleYPosition] = React.useState(300);
 
   // STORES COLOR OF ICON FROM BACKGROUND COLOR
   const iconColor = React.useMemo(() => {
@@ -72,16 +86,58 @@ export default function Home() {
         .replaceAll("</g>", "");
     };
 
+    const escapeXml = (unsafe) =>
+      unsafe
+        ? unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+        : "";
+
+    // background layer
+    const bgLayer = () => {
+      if (bgMode === "gradient") {
+        return `
+        <defs>
+          <linearGradient id="bggrad" x1="0%" y1="0%" x2="100%" y2="0%" gradientTransform="rotate(${bgGradient.angle})">
+            <stop offset="0%" stop-color="${bgGradient.from.hex}" />
+            <stop offset="100%" stop-color="${bgGradient.to.hex}" />
+          </linearGradient>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#bggrad)"/>
+        `;
+      }
+      return `<rect width="100%" height="100%" fill="${bgColor.hex}"/>`;
+    };
+
+    const titleLayer = () => {
+      if (!titleText) return "";
+      const anchor = titleXAlign === "center" ? "middle" : titleXAlign === "left" ? "start" : "end";
+      const x = titleXAlign === "center" ? canvasWidth / 2 : titleXAlign === "left" ? canvasWidth * 0.1 : canvasWidth * 0.9;
+      return `
+        <text x="${x}" y="${titleYPosition}" fill="${titleColor.hex}" font-size="${titleSize}"
+          font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
+          text-anchor="${anchor}" dominant-baseline="middle">${escapeXml(titleText)}</text>
+      `;
+    };
+
+    // compute icon center based on canvas size
+    const iconScale = Math.max(1, Math.round(canvasHeight / 60));
+    const iconPx = 24 * iconScale;
+    const iconX = Math.round((canvasWidth - iconPx) / 2);
+    const iconY = Math.round((canvasHeight - iconPx) / 2);
+
     // FOR COVER TYPE - ICON PATTERN
     if (coverType == "iconpattern" && svg) {
       setGeneratedCoverSvg(
         `<svg version="1.1" 
         baseProfile="full" 
-        width="1500" height="600"
-        viewbox="0 0 1500 600"
+        width="${canvasWidth}" height="${canvasHeight}"
+        viewBox="0 0 ${canvasWidth} ${canvasHeight}"
         preserveAspectRatio="xMidYMid meet"
         xmlns="http://www.w3.org/2000/svg">
-        <rect width="100%" height="100%" fill="${bgColor.hex}"/>
+        ${bgLayer()}
         <rect width="100%" height="100%" fill="url(#pattern)"/>
         <defs>
           <pattern id="pattern" x="0" y="0" width="${iconPatternSpacing}" height="${iconPatternSpacing}" patternTransform="rotate(${iconPatternRotation}) scale(${iconPatternSize})" patternUnits="userSpaceOnUse">
@@ -95,6 +151,7 @@ export default function Home() {
               </g>
           </pattern>
         </defs>
+        ${titleLayer()}
       </svg>
       `
       );
@@ -106,19 +163,22 @@ export default function Home() {
       setGeneratedCoverSvg(
         `<svg version="1.1"
           baseProfile="full"
-          viewbox="0 0 1500 600"
-          width="1500" height="600"
+          viewBox="0 0 ${canvasWidth} ${canvasHeight}"
+          width="${canvasWidth}" height="${canvasHeight}"
           preserveAspectRatio="xMidYMid meet"
           xmlns="http://www.w3.org/2000/svg">
-          <rect width="100%" height="100%" fill="${bgColor.hex}" />
-          <g transform="translate(610, 180) scale(10)" id="center_icon">${cleanedSvg(
+          ${bgLayer()}
+          <g transform="translate(${iconX}, ${iconY}) scale(${iconScale})" id="center_icon">${cleanedSvg(
             iconColor
           )}</g>
+          ${titleLayer()}
          </svg>`
       );
     }
   }, [
     bgColor,
+    bgMode,
+    bgGradient,
     iconColor,
     coverType,
     svg,
@@ -126,6 +186,13 @@ export default function Home() {
     iconPatternSize,
     iconPatternRotation,
     iconPatternShade,
+    canvasWidth,
+    canvasHeight,
+    titleText,
+    titleColor,
+    titleSize,
+    titleXAlign,
+    titleYPosition,
   ]);
 
   // WHEN DOWNLOAD SVG BUTTON IS CLICKED, CREATE A NEW BLOB AND DOWNLOAD IT
@@ -141,13 +208,13 @@ export default function Home() {
     SVGToImage({
       svg: generatedCoverSvg,
       mimetype: "image/png",
-      width: 3000,
-      height: 1200,
+      width: canvasWidth * 2,
+      height: canvasHeight * 2,
       quality: 1,
       outputFormat: "blob",
     })
       .then(function (blob) {
-        downloadHelper_a_tag.current.download = `covercon_${selectedIconName}_${coverType}.png`;
+        downloadHelper_a_tag.current.download = `covercon_${selectedIconName}_${coverType}_${canvasWidth}x${canvasHeight}.png`;
         downloadHelper_a_tag.current.href = window.URL.createObjectURL(blob);
         downloadHelper_a_tag.current.click();
       })
@@ -228,6 +295,80 @@ export default function Home() {
                   <option value="materialiconsoutlined">Outline</option>
                   <option value="materialiconsround">Rounded</option>
                 </select>
+              </div>
+              {/* NEW: BACKGROUND MODE */}
+              <div className={styles.iconTypeSetting}>
+                <h2>Background</h2>
+                <select
+                  value={bgMode}
+                  onChange={(e) => setBgMode(e.target.value)}
+                >
+                  <option value="solid">Solid color</option>
+                  <option value="gradient">Linear gradient</option>
+                </select>
+                {bgMode === "solid" && (
+                  <div className={styles.modifierSettings__colorSelect}>
+                    <h2>Select background color</h2>
+                    <ChromePicker
+                      color={bgColor}
+                      onChangeComplete={(color) => setBgColor(color)}
+                    />
+                    <p className={styles.notionColours}>Notion Colours</p>
+                    <CirclePicker
+                      color={bgColor}
+                      onChangeComplete={(color) => setBgColor(color)}
+                      className={styles.circlePicker}
+                      colors={[
+                        "#9B9A97",
+                        "#64473A",
+                        "#D9730D",
+                        "#DFAB01",
+                        "#0F7B6C",
+                        "#0B6E99",
+                        "#6940A5",
+                        "#AD1A72",
+                        "#E03E3E",
+                      ]}
+                    />
+                  </div>
+                )}
+                {bgMode === "gradient" && (
+                  <div className={styles.modifierSettings__colorSelect}>
+                    <h2>Gradient colors</h2>
+                    <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+                      <div>
+                        <p style={{ color: "#ccc" }}>From</p>
+                        <ChromePicker
+                          color={bgGradient.from}
+                          onChangeComplete={(color) =>
+                            setBgGradient((g) => ({ ...g, from: color }))
+                          }
+                        />
+                      </div>
+                      <div>
+                        <p style={{ color: "#ccc" }}>To</p>
+                        <ChromePicker
+                          color={bgGradient.to}
+                          onChangeComplete={(color) =>
+                            setBgGradient((g) => ({ ...g, to: color }))
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div className={styles.iconPatternSetting} style={{ marginTop: 10 }}>
+                      <h2>Angle</h2>
+                      <input
+                        type="range"
+                        min="0"
+                        max="360"
+                        value={bgGradient.angle}
+                        onChange={(e) =>
+                          setBgGradient((g) => ({ ...g, angle: parseInt(e.target.value) }))
+                        }
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
               {/* STEP 3 : ASK USER TO SELECT THE COVER DESIGN TYPE */}
               <div className={styles.iconTypeSetting}>
@@ -388,30 +529,105 @@ export default function Home() {
                   </motion.div>
                 )}
               </AnimatePresence>
-              {/* STEP 4 : ASK USER TO SELECT THE COVER COLOR */}
-              <div className={styles.modifierSettings__colorSelect}>
-                <h2>Select background color</h2>
-                <ChromePicker
-                  color={bgColor}
-                  onChangeComplete={(color) => setBgColor(color)}
+
+              {/* NEW: SIZE PRESETS */}
+              <div className={styles.iconTypeSetting}>
+                <h2>Size</h2>
+                <select
+                  value={sizePreset}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setSizePreset(v);
+                    if (v === "notion") {
+                      setCanvasWidth(1500);
+                      setCanvasHeight(600);
+                    } else if (v === "og") {
+                      setCanvasWidth(1200);
+                      setCanvasHeight(630);
+                    } else if (v === "twitter") {
+                      setCanvasWidth(1200);
+                      setCanvasHeight(675);
+                    } else if (v === "hd") {
+                      setCanvasWidth(1920);
+                      setCanvasHeight(1080);
+                    } else if (v === "square") {
+                      setCanvasWidth(1500);
+                      setCanvasHeight(1500);
+                    }
+                  }}
+                >
+                  <option value="notion">Notion (1500x600)</option>
+                  <option value="og">Open Graph (1200x630)</option>
+                  <option value="twitter">Twitter (1200x675)</option>
+                  <option value="hd">HD (1920x1080)</option>
+                  <option value="square">Square (1500x1500)</option>
+                  <option value="custom">Custom</option>
+                </select>
+                {sizePreset === "custom" && (
+                  <div style={{ display: "flex", gap: 10, marginTop: 10, justifyContent: "center" }}>
+                    <input
+                      type="number"
+                      value={canvasWidth}
+                      min={300}
+                      onChange={(e) => setCanvasWidth(parseInt(e.target.value) || 0)}
+                      placeholder="Width"
+                      style={{ width: 120, padding: 8, borderRadius: 8, border: "none", background: "#082032", color: "#ccc" }}
+                    />
+                    <input
+                      type="number"
+                      value={canvasHeight}
+                      min={200}
+                      onChange={(e) => setCanvasHeight(parseInt(e.target.value) || 0)}
+                      placeholder="Height"
+                      style={{ width: 120, padding: 8, borderRadius: 8, border: "none", background: "#082032", color: "#ccc" }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* NEW: TEXT OVERLAY */}
+              <div className={styles.iconTypeSetting}>
+                <h2>Title text (optional)</h2>
+                <input
+                  type="text"
+                  value={titleText}
+                  onChange={(e) => setTitleText(e.target.value)}
+                  placeholder="Enter title"
+                  style={{ width: "100%", padding: 10, borderRadius: 8, border: "none", background: "#082032", color: "#ccc" }}
                 />
-                <p className={styles.notionColours}>Notion Colours</p>
-                <CirclePicker
-                  color={bgColor}
-                  onChangeComplete={(color) => setBgColor(color)}
-                  className={styles.circlePicker}
-                  colors={[
-                    "#9B9A97",
-                    "#64473A",
-                    "#D9730D",
-                    "#DFAB01",
-                    "#0F7B6C",
-                    "#0B6E99",
-                    "#6940A5",
-                    "#AD1A72",
-                    "#E03E3E",
-                  ]}
-                />
+                <div style={{ display: "flex", gap: 20, marginTop: 10, flexWrap: "wrap", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ minWidth: 220 }}>
+                    <p style={{ color: "#ccc", margin: 0, marginBottom: 6 }}>Text color</p>
+                    <ChromePicker
+                      color={titleColor}
+                      onChangeComplete={(c) => setTitleColor(c)}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ color: "#ccc", margin: 0 }}>Font size: {titleSize}px</p>
+                    <input
+                      type="range"
+                      min="12"
+                      max="160"
+                      value={titleSize}
+                      onChange={(e) => setTitleSize(parseInt(e.target.value))}
+                    />
+                    <p style={{ color: "#ccc", margin: 0, marginTop: 10 }}>Y position: {titleYPosition}px</p>
+                    <input
+                      type="range"
+                      min="0"
+                      max={canvasHeight}
+                      value={titleYPosition}
+                      onChange={(e) => setTitleYPosition(parseInt(e.target.value))}
+                    />
+                    <p style={{ color: "#ccc", margin: 0, marginTop: 10 }}>Alignment</p>
+                    <select value={titleXAlign} onChange={(e) => setTitleXAlign(e.target.value)}>
+                      <option value="left">Left</option>
+                      <option value="center">Center</option>
+                      <option value="right">Right</option>
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
 
