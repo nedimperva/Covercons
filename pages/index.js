@@ -57,6 +57,19 @@ export default function Home() {
   const [shapeScale, setShapeScale] = React.useState(1.2);
   const [secondaryIconName, setSecondaryIconName] = React.useState("star");
   const [secondaryIconVersion, setSecondaryIconVersion] = React.useState(1);
+  // soft shadow + border + glass
+  const [softShadowEnabled, setSoftShadowEnabled] = React.useState(false);
+  const [softShadowBlur, setSoftShadowBlur] = React.useState(12);
+  const [softShadowOffset, setSoftShadowOffset] = React.useState(8);
+  const [borderEnabled, setBorderEnabled] = React.useState(false);
+  const [borderWidth, setBorderWidth] = React.useState(8);
+  const [borderRadius, setBorderRadius] = React.useState(24);
+  const [borderColor, setBorderColor] = React.useState({ hex: "#FFFFFF88" });
+  const [glassEnabled, setGlassEnabled] = React.useState(false);
+  const [glassOpacity, setGlassOpacity] = React.useState(0.15);
+  const [glassRadius, setGlassRadius] = React.useState(24);
+  // palette presets
+  const [palettePreset, setPalettePreset] = React.useState("custom");
 
   // STORES COLOR OF ICON FROM BACKGROUND COLOR
   const iconColor = React.useMemo(() => {
@@ -154,6 +167,31 @@ export default function Home() {
       `;
     };
 
+    const softShadowDefs = () => {
+      if (!softShadowEnabled) return "";
+      return `
+        <defs>
+          <filter id="softshadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="${softShadowOffset}" dy="${softShadowOffset}" stdDeviation="${softShadowBlur}" flood-color="#000000" flood-opacity="0.35" />
+          </filter>
+        </defs>
+      `;
+    };
+
+    const borderLayer = () => {
+      if (!borderEnabled) return "";
+      return `<rect x="0" y="0" width="100%" height="100%" rx="${borderRadius}" ry="${borderRadius}" fill="none" stroke="${borderColor.hex}" stroke-width="${borderWidth}" />`;
+    };
+
+    const glassLayer = () => {
+      if (!glassEnabled) return "";
+      const gx = canvasWidth * 0.1;
+      const gy = canvasHeight * 0.2;
+      const gw = canvasWidth * 0.8;
+      const gh = canvasHeight * 0.6;
+      return `<rect x="${gx}" y="${gy}" width="${gw}" height="${gh}" rx="${glassRadius}" ry="${glassRadius}" fill="rgba(255,255,255,${glassOpacity})" />`;
+    };
+
     const shapeLayer = () => {
       if (!shapeEnabled) return "";
       const midX = canvasWidth / 2;
@@ -207,6 +245,8 @@ export default function Home() {
         <rect width="100%" height="100%" fill="url(#pattern)"/>
         ${shapeLayer()}
         ${noiseLayer()}
+        ${borderLayer()}
+        ${glassLayer()}
         <defs>
           <pattern id="pattern" x="0" y="0" width="${iconPatternSpacing}" height="${iconPatternSpacing}" patternTransform="rotate(${iconPatternRotation}) scale(${iconPatternSize})" patternUnits="userSpaceOnUse">
             <g>
@@ -246,7 +286,10 @@ export default function Home() {
           ${bgLayer()}
           ${shapeLayer()}
           ${noiseLayer()}
-          <g transform="translate(${iconX}, ${iconY}) scale(${iconScale})" id="center_icon">${cleanedSvg(
+          ${borderLayer()}
+          ${glassLayer()}
+          ${softShadowDefs()}
+          <g transform="translate(${iconX}, ${iconY}) scale(${iconScale})" id="center_icon"${softShadowEnabled ? ' filter="url(#softshadow)"' : ''}>${cleanedSvg(
             iconColor
           )}</g>
           ${titleLayer()}
@@ -400,6 +443,42 @@ export default function Home() {
               {/* NEW: BACKGROUND MODE */}
               <div className={styles.iconTypeSetting}>
                 <h2>Background</h2>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <label style={{ color: '#ccc' }}>Palette</label>
+                  <select
+                    value={palettePreset}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setPalettePreset(v);
+                      if (v === 'custom') return;
+                      const presets = {
+                        ocean: { mode: 'gradient', from: '#3A95FF', to: '#6EE7F9', angle: 45 },
+                        sunset: { mode: 'gradient', from: '#FF7E5F', to: '#FEB47B', angle: 30 },
+                        mint: { mode: 'solid', color: '#10B981' },
+                        grape: { mode: 'gradient', from: '#7F00FF', to: '#E100FF', angle: 60 },
+                        dark: { mode: 'solid', color: '#1F2937' },
+                        light: { mode: 'solid', color: '#E5E7EB' },
+                      } as const;
+                      const p = (presets as any)[v];
+                      if (!p) return;
+                      if (p.mode === 'solid') {
+                        setBgMode('solid');
+                        setBgColor({ hex: p.color });
+                      } else {
+                        setBgMode('gradient');
+                        setBgGradient({ from: { hex: p.from }, to: { hex: p.to }, angle: p.angle });
+                      }
+                    }}
+                  >
+                    <option value="custom">Custom</option>
+                    <option value="ocean">Ocean</option>
+                    <option value="sunset">Sunset</option>
+                    <option value="mint">Mint</option>
+                    <option value="grape">Grape</option>
+                    <option value="dark">Mono Dark</option>
+                    <option value="light">Mono Light</option>
+                  </select>
+                </div>
                 <select
                   value={bgMode}
                   onChange={(e) => setBgMode(e.target.value)}

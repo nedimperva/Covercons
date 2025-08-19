@@ -1,4 +1,13 @@
-export default function SVGToImage(settings) {
+export type SvgToImageSettings = {
+  svg: SVGElement | string | null;
+  mimetype?: string;
+  quality?: number;
+  width?: number | "auto";
+  height?: number | "auto";
+  outputFormat?: "base64" | "blob";
+};
+
+export default function SVGToImage(settings: SvgToImageSettings) {
   let _settings = {
     svg: null,
     // Usually all SVG have transparency, so PNG is the way to go by default
@@ -10,8 +19,9 @@ export default function SVGToImage(settings) {
   };
 
   // Override default settings
-  for (let key in settings) {
-    _settings[key] = settings[key];
+  for (const key in settings) {
+    // @ts-ignore - dynamic override of default settings
+    _settings[key] = (settings as any)[key];
   }
 
   return new Promise(function (resolve, reject) {
@@ -29,7 +39,7 @@ export default function SVGToImage(settings) {
     }
 
     let canvas = document.createElement("canvas");
-    let context = canvas.getContext("2d");
+    let context = canvas.getContext("2d")!;
 
     let svgXml = new XMLSerializer().serializeToString(svgNode);
     let svgBase64 = "data:image/svg+xml;base64," + btoa(svgXml);
@@ -72,14 +82,14 @@ export default function SVGToImage(settings) {
         // Fullfil and Return the Blob image
         canvas.toBlob(
           function (blob) {
-            resolve(blob);
+            resolve(blob as any);
           },
           _settings.mimetype,
           _settings.quality
         );
       } else {
         // Fullfil and Return the Base64 image
-        resolve(canvas.toDataURL(_settings.mimetype, _settings.quality));
+        resolve(canvas.toDataURL(_settings.mimetype, _settings.quality) as any);
       }
     };
 

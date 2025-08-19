@@ -4,10 +4,16 @@ import useDebounce from "../lib/useDebounce";
 import Icon from "./Icon";
 import { motion, AnimatePresence } from "framer-motion";
 
-function IconSearch({ setSelectedIconName, setSelectedIconVersion }) {
-  const [fuse, setFuse] = useState();
-  const [results, setResults] = useState([]);
-  const [searchTerm, setSearchTerm] = useState([]);
+type IconMeta = { name: string; version: number; tags?: string[] };
+type Props = {
+  setSelectedIconName: (name: string) => void;
+  setSelectedIconVersion: (v: number) => void;
+};
+
+function IconSearch({ setSelectedIconName, setSelectedIconVersion }: Props) {
+  const [fuse, setFuse] = useState<Fuse<IconMeta> | undefined>();
+  const [results, setResults] = useState<IconMeta[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const debouncedSearchTerm = useDebounce(searchTerm, 100);
 
   useEffect(() => {
@@ -16,7 +22,7 @@ function IconSearch({ setSelectedIconName, setSelectedIconVersion }) {
       let body = await response.text();
       let metadata = JSON.parse(body.replace(`)]}'`, ""));
 
-      const initFuse = new Fuse(metadata.icons, {
+      const initFuse = new Fuse<IconMeta>(metadata.icons, {
         keys: ["name", "tags"],
       });
 
@@ -26,11 +32,11 @@ function IconSearch({ setSelectedIconName, setSelectedIconVersion }) {
   }, []);
 
   useEffect(() => {
-    if (debouncedSearchTerm?.length > 1 && debouncedSearchTerm?.length < 15) {
+    if (fuse && debouncedSearchTerm?.length > 1 && debouncedSearchTerm?.length < 15) {
       // PASS THE TERM TO OUR FUSE
       let currentResults = fuse
         .search(debouncedSearchTerm)
-        .map((result) => result.item);
+        .map((result) => result.item as IconMeta);
 
       // SPLICE THE LARGE RESULT
       let splicedCurrentResult = currentResults.splice(0, 20);
