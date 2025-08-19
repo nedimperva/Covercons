@@ -67,18 +67,52 @@ export default function Home() {
   }, [bgColor]);
 
   React.useEffect(() => {
-    fetch(`https://fonts.gstatic.com/s/i/${selectedIconType}/${selectedIconName}/v${selectedIconVersion}/24px.svg`)
-      .then((res) => res.text())
-      .then((b) => setSvg(b))
-      .catch((err) => console.log(err));
+    const run = async () => {
+      try {
+        if (selectedIconType.startsWith("local:")) {
+          const pack = selectedIconType.split(":")[1];
+          const res = await fetch(`/api/local-icons/svg?pack=${pack}&name=${encodeURIComponent(selectedIconName)}`);
+          const b = await res.text();
+          setSvg(b);
+        } else {
+          const res = await fetch(
+            `/api/icon-svg?type=${encodeURIComponent(selectedIconType)}&name=${encodeURIComponent(
+              selectedIconName
+            )}&version=${selectedIconVersion}&size=24px`
+          );
+          const b = await res.text();
+          setSvg(b);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    run();
   }, [selectedIconName, selectedIconVersion, selectedIconType]);
 
   React.useEffect(() => {
     if (!secondaryIconName) return;
-    fetch(`https://fonts.gstatic.com/s/i/${selectedIconType}/${secondaryIconName}/v${secondaryIconVersion}/24px.svg`)
-      .then((res) => res.text())
-      .then((b) => setSvg2(b))
-      .catch((err) => console.log(err));
+    const run = async () => {
+      try {
+        if (selectedIconType.startsWith("local:")) {
+          const pack = selectedIconType.split(":")[1];
+          const res = await fetch(`/api/local-icons/svg?pack=${pack}&name=${encodeURIComponent(secondaryIconName)}`);
+          const b = await res.text();
+          setSvg2(b);
+        } else {
+          const res = await fetch(
+            `/api/icon-svg?type=${encodeURIComponent(selectedIconType)}&name=${encodeURIComponent(
+              secondaryIconName
+            )}&version=${secondaryIconVersion}&size=24px`
+          );
+          const b = await res.text();
+          setSvg2(b);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    run();
   }, [secondaryIconName, secondaryIconVersion, selectedIconType]);
 
   React.useEffect(() => {
@@ -87,10 +121,11 @@ export default function Home() {
       return raw
         .substring(raw.indexOf(">") + 1, raw.length - 6)
         .replaceAll('<rect fill="none" height="24" width="24"/>', "")
-        .replaceAll("<path", `<path fill="${color}"`)
-        .replaceAll("<rect", `<rect fill="${color}"`)
-        .replaceAll("<circle", `<circle fill="${color}"`)
-        .replaceAll("<polygon", `<polygon fill="${color}"`)
+        .replaceAll("<path", `<path fill=\"${color}\"`)
+        .replaceAll("<rect", `<rect fill=\"${color}\"`)
+        .replaceAll("<circle", `<circle fill=\"${color}\"`)
+        .replaceAll("<polygon", `<polygon fill=\"${color}\"`)
+        .replaceAll(/stroke=\".*?\"/g, `stroke=\\\"${color}\\\"`)
         .replace(new RegExp(/<(.*?)(fill=\"none\")(.*?)>/), "")
         .replace(getRegFromString(`/(<(.*?)fill='${color}')(.*?)(fill=\"none\")(.*?)(>)/`), "")
         .replaceAll("<g>", "")
@@ -308,9 +343,18 @@ export default function Home() {
           <div className={styles.modifierSettings}>
             <div className={styles.modifierSettings__iconNameSetting}>
               <h2>Search Icon</h2>
+              <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 8 }}>
+                <label style={{ color: "#ccc" }}>Icon set</label>
+                <select value={selectedIconType} onChange={(e) => setSelectedIconType(e.target.value)}>
+                  <option value="materialicons">Material (Google)</option>
+                  <option value="materialiconsoutlined">Material Outlined (Google)</option>
+                  <option value="local:lucide">Local: Lucide (offline)</option>
+                </select>
+              </div>
               <IconSearch
                 setSelectedIconName={setSelectedIconName}
                 setSelectedIconVersion={setSelectedIconVersion}
+                pack={selectedIconType.startsWith("local:") ? "lucide" : "google"}
               />
             </div>
 
@@ -449,7 +493,11 @@ export default function Home() {
                   <motion.div variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }} className={styles.iconPatternSetting}>
                     <h2>Secondary icon (pattern)</h2>
                     <p style={{ color: "#9aa" }}>Optional: used to alternate in the pattern.</p>
-                    <IconSearch setSelectedIconName={setSecondaryIconName} setSelectedIconVersion={setSecondaryIconVersion} />
+                    <IconSearch
+                      setSelectedIconName={setSecondaryIconName}
+                      setSelectedIconVersion={setSecondaryIconVersion}
+                      pack={selectedIconType.startsWith("local:") ? "lucide" : "google"}
+                    />
                   </motion.div>
                 </motion.div>
               )}

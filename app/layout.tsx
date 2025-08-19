@@ -13,8 +13,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#222222" />
+      </head>
+      <body>
+        {children}
+      </body>
     </html>
   );
 }
-

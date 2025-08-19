@@ -8,9 +8,10 @@ type IconMeta = { name: string; version: number; tags?: string[] };
 type Props = {
   setSelectedIconName: (name: string) => void;
   setSelectedIconVersion: (v: number) => void;
+  pack?: "google" | "lucide";
 };
 
-function IconSearch({ setSelectedIconName, setSelectedIconVersion }: Props) {
+function IconSearch({ setSelectedIconName, setSelectedIconVersion, pack = "google" }: Props) {
   const [fuse, setFuse] = useState<Fuse<IconMeta> | undefined>();
   const [results, setResults] = useState<IconMeta[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -18,18 +19,21 @@ function IconSearch({ setSelectedIconName, setSelectedIconVersion }: Props) {
 
   useEffect(() => {
     let fetchMetaData = async () => {
-      let response = await fetch(`/api/icons-metadata`);
-      let body = await response.text();
-      let metadata = JSON.parse(body.replace(`)]}'`, ""));
-
-      const initFuse = new Fuse<IconMeta>(metadata.icons, {
-        keys: ["name", "tags"],
-      });
-
-      setFuse(initFuse);
+      if (pack === "google") {
+        const response = await fetch(`/api/icons-metadata`);
+        const body = await response.text();
+        const metadata = JSON.parse(body.replace(`)]}'`, ""));
+        const initFuse = new Fuse<IconMeta>(metadata.icons, { keys: ["name", "tags"] });
+        setFuse(initFuse);
+      } else {
+        const response = await fetch(`/api/local-icons/metadata?pack=lucide`);
+        const metadata = await response.json();
+        const initFuse = new Fuse<IconMeta>(metadata.icons, { keys: ["name", "tags"] });
+        setFuse(initFuse);
+      }
     };
     fetchMetaData();
-  }, []);
+  }, [pack]);
 
   useEffect(() => {
     if (fuse && debouncedSearchTerm?.length > 1 && debouncedSearchTerm?.length < 15) {
@@ -71,6 +75,7 @@ function IconSearch({ setSelectedIconName, setSelectedIconVersion }: Props) {
             >
               {results.map((result) => (
                 <div
+                  key={`${result.name}-${result.version}`}
                   className="iconSearch__autoCompleteItem"
                   onClick={() => {
                     setSelectedIconName(result.name);
@@ -79,7 +84,11 @@ function IconSearch({ setSelectedIconName, setSelectedIconVersion }: Props) {
                     setResults([]);
                   }}
                 >
-                  <Icon name={result.name} version={result.version} />
+                  {pack === "google" ? (
+                    <Icon name={result.name} version={result.version} />
+                  ) : (
+                    <span style={{ color: "#fff", fontSize: 14 }}>{result.name}</span>
+                  )}
                 </div>
               ))}
             </motion.div>
