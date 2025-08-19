@@ -1,7 +1,7 @@
 
 # Covercons
 
-A tool to generate beautiful infinte notion images with icons
+A tool to generate beautiful Notion cover images with icons
 
 🔗 **Link:** https://covercons.vercel.app/
 
@@ -25,6 +25,18 @@ npm install
 ```bash
 npm run dev
 ```
+
+## New Features
+
+- Gradient backgrounds with angle control
+- Size presets (Notion, OG, Twitter, HD, Square) + custom
+- Optional title text overlay (color, size, alignment, position)
+- Shape overlays (blob, circle, rounded stripe) with rotation and opacity
+- Noise grain overlay with intensity and scale
+- Multi-icon patterns (alternate a secondary icon)
+- Server-side PNG/WebP export for consistent, crisp output
+
+To export via server, use the “Server PNG” or “WebP” buttons in the UI.
     
 ## Authors
 

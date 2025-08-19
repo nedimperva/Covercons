@@ -19,6 +19,7 @@ export default function Home() {
 
   // APPLICATION STATE
   const [svg, setSvg] = React.useState(null);
+  const [svg2, setSvg2] = React.useState(null);
   const [bgColor, setBgColor] = React.useState({ hex: "#3A95FF" });
   const [bgMode, setBgMode] = React.useState("solid"); // solid | gradient
   const [bgGradient, setBgGradient] = React.useState({
@@ -45,6 +46,17 @@ export default function Home() {
   const [titleSize, setTitleSize] = React.useState(64);
   const [titleXAlign, setTitleXAlign] = React.useState("center"); // left|center|right
   const [titleYPosition, setTitleYPosition] = React.useState(300);
+  // overlays
+  const [noiseEnabled, setNoiseEnabled] = React.useState(false);
+  const [noiseOpacity, setNoiseOpacity] = React.useState(0.08);
+  const [noiseScale, setNoiseScale] = React.useState(2.5);
+  const [shapeEnabled, setShapeEnabled] = React.useState(false);
+  const [shapeType, setShapeType] = React.useState("blob"); // blob | circle | stripe
+  const [shapeOpacity, setShapeOpacity] = React.useState(0.18);
+  const [shapeRotation, setShapeRotation] = React.useState(0);
+  const [shapeScale, setShapeScale] = React.useState(1.2);
+  const [secondaryIconName, setSecondaryIconName] = React.useState("star");
+  const [secondaryIconVersion, setSecondaryIconVersion] = React.useState(1);
 
   // STORES COLOR OF ICON FROM BACKGROUND COLOR
   const iconColor = React.useMemo(() => {
@@ -64,12 +76,24 @@ export default function Home() {
       .catch((err) => console.log(err));
   }, [selectedIconName, selectedIconVersion, selectedIconType]);
 
+  // GET SECONDARY ICON (for multi-icon pattern)
+  React.useEffect(() => {
+    if (!secondaryIconName) return;
+    fetch(
+      `https://fonts.gstatic.com/s/i/${selectedIconType}/${secondaryIconName}/v${secondaryIconVersion}/24px.svg`
+    )
+      .then((res) => res.text())
+      .then((b) => setSvg2(b))
+      .catch((err) => console.log(err));
+  }, [secondaryIconName, secondaryIconVersion, selectedIconType]);
+
   // GENERATE COMPLETE SVG WITH BACKGROUND FROM ICON
   React.useEffect(() => {
     // CLEAN THE FETCHED SVG (MOST OF THE ICON BUGS CAN BE SOLVED HERE)
-    let cleanedSvg = (color) => {
-      return svg
-        .substring(svg.indexOf(">") + 1, svg.length - 6)
+    const cleanSvgFromRaw = (raw, color) => {
+      if (!raw) return '';
+      return raw
+        .substring(raw.indexOf(">") + 1, raw.length - 6)
         .replaceAll('<rect fill="none" height="24" width="24"/>', "")
         .replaceAll("<path", `<path fill="${color}"`)
         .replaceAll("<rect", `<rect fill="${color}"`)
@@ -85,6 +109,9 @@ export default function Home() {
         .replaceAll("<g>", "")
         .replaceAll("</g>", "");
     };
+
+    const cleanedSvg = (color) => cleanSvgFromRaw(svg, color);
+    const cleanedSvg2 = (color) => cleanSvgFromRaw(svg2 || svg, color);
 
     const escapeXml = (unsafe) =>
       unsafe
@@ -109,6 +136,45 @@ export default function Home() {
         `;
       }
       return `<rect width="100%" height="100%" fill="${bgColor.hex}"/>`;
+    };
+
+    const noiseLayer = () => {
+      if (!noiseEnabled) return "";
+      return `
+        <defs>
+          <filter id="noisefx">
+            <feTurbulence type="fractalNoise" baseFrequency="${noiseScale / 100}" numOctaves="2" stitchTiles="stitch"/>
+            <feColorMatrix type="saturate" values="0"/>
+            <feComponentTransfer>
+              <feFuncA type="linear" slope="${noiseOpacity}"/>
+            </feComponentTransfer>
+          </filter>
+        </defs>
+        <rect width="100%" height="100%" filter="url(#noisefx)" opacity="1" />
+      `;
+    };
+
+    const shapeLayer = () => {
+      if (!shapeEnabled) return "";
+      const midX = canvasWidth / 2;
+      const midY = canvasHeight / 2;
+      const fill = tinycolor(bgColor.hex).lighten(10).setAlpha(shapeOpacity).toRgbString();
+      const scale = shapeScale;
+      if (shapeType === 'circle') {
+        const r = Math.max(canvasWidth, canvasHeight) * 0.35 * scale;
+        return `<g transform="translate(${midX}, ${midY}) rotate(${shapeRotation})"><circle cx="0" cy="0" r="${r}" fill="${fill}"/></g>`;
+      }
+      if (shapeType === 'stripe') {
+        const w = canvasWidth * 0.8 * scale;
+        const h = canvasHeight * 0.25 * scale;
+        const rx = Math.min(w, h) * 0.2;
+        return `<g transform="translate(${midX}, ${midY}) rotate(${shapeRotation})"><rect x="${-w/2}" y="${-h/2}" width="${w}" height="${h}" rx="${rx}" fill="${fill}"/></g>`;
+      }
+      // blob path (simple superellipse-like)
+      const w = canvasWidth * 0.9 * scale;
+      const h = canvasHeight * 0.6 * scale;
+      const p = `M ${-w/2} 0 C ${-w/2} ${-h/2}, ${-w/4} ${-h/2}, 0 ${-h/2} C ${w/2} ${-h/2}, ${w/2} 0, ${w/4} ${h/4} C 0 ${h/2}, ${-w/4} ${h/3}, ${-w/2} 0 Z`;
+      return `<g transform="translate(${midX}, ${midY}) rotate(${shapeRotation})"><path d="${p}" fill="${fill}"/></g>`;
     };
 
     const titleLayer = () => {
@@ -139,16 +205,26 @@ export default function Home() {
         xmlns="http://www.w3.org/2000/svg">
         ${bgLayer()}
         <rect width="100%" height="100%" fill="url(#pattern)"/>
+        ${shapeLayer()}
+        ${noiseLayer()}
         <defs>
           <pattern id="pattern" x="0" y="0" width="${iconPatternSpacing}" height="${iconPatternSpacing}" patternTransform="rotate(${iconPatternRotation}) scale(${iconPatternSize})" patternUnits="userSpaceOnUse">
-              <g>
-                ${cleanedSvg(
-                  shadeColor(
-                    bgColor.hex.substring(1),
-                    parseInt(iconPatternShade)
-                  )
-                )}
-              </g>
+            <g>
+              ${cleanedSvg(
+                shadeColor(
+                  bgColor.hex.substring(1),
+                  parseInt(iconPatternShade)
+                )
+              )}
+            </g>
+            <g transform="translate(12,12)">
+              ${cleanedSvg2(
+                shadeColor(
+                  bgColor.hex.substring(1),
+                  parseInt(iconPatternShade) + 15
+                )
+              )}
+            </g>
           </pattern>
         </defs>
         ${titleLayer()}
@@ -168,6 +244,8 @@ export default function Home() {
           preserveAspectRatio="xMidYMid meet"
           xmlns="http://www.w3.org/2000/svg">
           ${bgLayer()}
+          ${shapeLayer()}
+          ${noiseLayer()}
           <g transform="translate(${iconX}, ${iconY}) scale(${iconScale})" id="center_icon">${cleanedSvg(
             iconColor
           )}</g>
@@ -221,6 +299,29 @@ export default function Home() {
       .catch(function (err) {
         alert(err);
       });
+  };
+
+  // SERVER-SIDE RENDERED DOWNLOAD (PNG/WEBP)
+  const handleServerDownload = async (format = 'png') => {
+    try {
+      const resp = await fetch('/api/render', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          svg: generatedCoverSvg,
+          width: canvasWidth * 2,
+          height: canvasHeight * 2,
+          format,
+        }),
+      });
+      if (!resp.ok) throw new Error('Render failed');
+      const blob = await resp.blob();
+      downloadHelper_a_tag.current.download = `covercon_${selectedIconName}_${coverType}_${canvasWidth}x${canvasHeight}.${format}`;
+      downloadHelper_a_tag.current.href = window.URL.createObjectURL(blob);
+      downloadHelper_a_tag.current.click();
+    } catch (e) {
+      alert('Server render failed');
+    }
   };
 
   return (
@@ -526,6 +627,19 @@ export default function Home() {
                         <option value={28}>Light</option>
                       </select>
                     </motion.div>
+
+                    {/* STEP 3.5 : SECONDARY ICON FOR PATTERN */}
+                    <motion.div
+                      variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
+                      className={styles.iconPatternSetting}
+                    >
+                      <h2>Secondary icon (pattern)</h2>
+                      <p style={{ color: '#9aa' }}>Optional: used to alternate in the pattern.</p>
+                      <IconSearch
+                        setSelectedIconName={setSecondaryIconName}
+                        setSelectedIconVersion={setSecondaryIconVersion}
+                      />
+                    </motion.div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -629,6 +743,56 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+
+              {/* NEW: SHAPE OVERLAY */}
+              <div className={styles.iconTypeSetting}>
+                <h2>Shape overlay</h2>
+                <label style={{ color: '#ccc' }}>
+                  <input
+                    type="checkbox"
+                    checked={shapeEnabled}
+                    onChange={(e) => setShapeEnabled(e.target.checked)}
+                  />{' '}
+                  Enable
+                </label>
+                {shapeEnabled && (
+                  <div className={styles.iconPatternSetting}>
+                    <h2>Type</h2>
+                    <select value={shapeType} onChange={(e)=>setShapeType(e.target.value)}>
+                      <option value="blob">Blob</option>
+                      <option value="circle">Circle</option>
+                      <option value="stripe">Rounded stripe</option>
+                    </select>
+                    <h2>Opacity: {Math.round(shapeOpacity*100)}%</h2>
+                    <input type="range" min="0" max="1" step="0.01" value={shapeOpacity} onChange={(e)=>setShapeOpacity(parseFloat(e.target.value))} />
+                    <h2>Rotation: {shapeRotation}°</h2>
+                    <input type="range" min="0" max="360" value={shapeRotation} onChange={(e)=>setShapeRotation(parseInt(e.target.value))} />
+                    <h2>Scale: {shapeScale.toFixed(2)}x</h2>
+                    <input type="range" min="0.5" max="2" step="0.05" value={shapeScale} onChange={(e)=>setShapeScale(parseFloat(e.target.value))} />
+                  </div>
+                )}
+              </div>
+
+              {/* NEW: NOISE OVERLAY */}
+              <div className={styles.iconTypeSetting}>
+                <h2>Noise</h2>
+                <label style={{ color: '#ccc' }}>
+                  <input
+                    type="checkbox"
+                    checked={noiseEnabled}
+                    onChange={(e) => setNoiseEnabled(e.target.checked)}
+                  />{' '}
+                  Enable
+                </label>
+                {noiseEnabled && (
+                  <div className={styles.iconPatternSetting}>
+                    <h2>Opacity: {Math.round(noiseOpacity*100)}%</h2>
+                    <input type="range" min="0" max="0.5" step="0.01" value={noiseOpacity} onChange={(e)=>setNoiseOpacity(parseFloat(e.target.value))} />
+                    <h2>Scale</h2>
+                    <input type="range" min="1" max="10" step="0.5" value={noiseScale} onChange={(e)=>setNoiseScale(parseFloat(e.target.value))} />
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* COVER PREVIEW IN THE RIGHT SIDE FOR LARGE SCREENS */}
@@ -669,6 +833,28 @@ export default function Home() {
                     width={20}
                   />
                   Download PNG
+                </button>
+                <button
+                  className={styles.downloadBtn}
+                  onClick={() => handleServerDownload('png')}
+                >
+                  <img
+                    src="/assets/image-logo.svg"
+                    alt="download icon"
+                    width={20}
+                  />
+                  Server PNG
+                </button>
+                <button
+                  className={styles.downloadBtn}
+                  onClick={() => handleServerDownload('webp')}
+                >
+                  <img
+                    src="/assets/image-logo.svg"
+                    alt="download icon"
+                    width={20}
+                  />
+                  WebP
                 </button>
               </div>
             </div>
