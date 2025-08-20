@@ -331,20 +331,19 @@ export default function Home() {
     }
   };
 
-  // UI (copied from original page with minor TS adjustments)
   return (
-    <>
-      <a ref={downloadHelper_a_tag as any} style={{ display: "none" }} />
+    <div>
+      <a ref={downloadHelper_a_tag} style={{ display: "none" }} />
       <main className={styles.main}>
         <h1 className={styles.title}>
           <img src="/favicon.svg" /> Covercons
         </h1>
         <div className={styles.wrapper}>
           <div className={styles.modifierSettings}>
-            <div className={styles.modifierSettings__iconNameSetting}>
-              <h2>Search Icon</h2>
-              <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 8 }}>
-                <label style={{ color: "#ccc" }}>Icon set</label>
+            <div className={styles.iconTypeSetting}>
+              <h2>Icon Selection</h2>
+              <div style={{ display: "flex", gap: "var(--space-sm)", alignItems: "center", marginBottom: "var(--space-sm)" }}>
+                <label style={{ color: "var(--text-secondary)", fontSize: "0.875rem" }}>Icon set</label>
                 <select value={selectedIconType} onChange={(e) => setSelectedIconType(e.target.value)}>
                   <option value="materialicons">Material (Google)</option>
                   <option value="materialiconsoutlined">Material Outlined (Google)</option>
@@ -360,8 +359,8 @@ export default function Home() {
 
             <div className={styles.iconTypeSetting}>
               <h2>Background</h2>
-              <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-                <label style={{ color: "#ccc" }}>Palette</label>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-sm)", alignItems: "center", marginBottom: "var(--space-sm)" }}>
+                <label style={{ color: "var(--text-secondary)", fontSize: "0.875rem" }}>Palette</label>
                 <select
                   value={palettePreset}
                   onChange={(e) => {
@@ -395,11 +394,12 @@ export default function Home() {
                   <option value="dark">Mono Dark</option>
                   <option value="light">Mono Light</option>
                 </select>
-              </div>
+                <label style={{ color: "var(--text-secondary)", fontSize: "0.875rem" }}>Type</label>
               <select value={bgMode} onChange={(e) => setBgMode(e.target.value as any)}>
                 <option value="solid">Solid color</option>
                 <option value="gradient">Linear gradient</option>
               </select>
+              </div>
               {bgMode === "solid" && (
                 <div className={styles.modifierSettings__colorSelect}>
                   <h2>Select background color</h2>
@@ -435,11 +435,40 @@ export default function Home() {
             </div>
 
             <div className={styles.iconTypeSetting}>
-              <h2>Select the Cover Design</h2>
+              <h2>Cover Design & Size</h2>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-sm)", alignItems: "center", marginBottom: "var(--space-sm)" }}>
+                <label style={{ color: "var(--text-secondary)", fontSize: "0.875rem" }}>Type</label>
               <select value={coverType} onChange={(e) => { setCoverType(e.target.value); setShowAdvancedSettings(false); }}>
                 <option value="singlemiddleicon">Single Icon</option>
                 <option value="iconpattern">Icon Pattern</option>
               </select>
+                <label style={{ color: "var(--text-secondary)", fontSize: "0.875rem" }}>Size</label>
+                <select
+                  value={sizePreset}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setSizePreset(v);
+                    if (v === "notion") { setCanvasWidth(1500); setCanvasHeight(600); }
+                    else if (v === "og") { setCanvasWidth(1200); setCanvasHeight(630); }
+                    else if (v === "twitter") { setCanvasWidth(1200); setCanvasHeight(675); }
+                    else if (v === "hd") { setCanvasWidth(1920); setCanvasHeight(1080); }
+                    else if (v === "square") { setCanvasWidth(1500); setCanvasHeight(1500); }
+                  }}
+                >
+                  <option value="notion">Notion (1500x600)</option>
+                  <option value="og">Open Graph (1200x630)</option>
+                  <option value="twitter">Twitter (1200x675)</option>
+                  <option value="hd">HD (1920x1080)</option>
+                  <option value="square">Square (1500x1500)</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </div>
+              {sizePreset === "custom" && (
+                <div style={{ display: "flex", gap: "var(--space-sm)", justifyContent: "center" }}>
+                  <input type="number" value={canvasWidth} min={300} onChange={(e) => setCanvasWidth(parseInt(e.target.value) || 0)} placeholder="Width" style={{ width: 120, padding: "var(--space-sm)", borderRadius: "var(--radius-md)", border: "1px solid var(--border-color)", background: "var(--card-bg)", color: "var(--text-primary)" }} />
+                  <input type="number" value={canvasHeight} min={200} onChange={(e) => setCanvasHeight(parseInt(e.target.value) || 0)} placeholder="Height" style={{ width: 120, padding: "var(--space-sm)", borderRadius: "var(--radius-md)", border: "1px solid var(--border-color)", background: "var(--card-bg)", color: "var(--text-primary)" }} />
+                </div>
+              )}
               <AnimatePresence>
                 {coverType == "iconpattern" && (
                   <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ opacity: 0 }} className={styles.advancedSettingsBtn}>
@@ -503,49 +532,28 @@ export default function Home() {
               )}
             </AnimatePresence>
 
-            <div className={styles.iconTypeSetting}>
-              <h2>Size</h2>
-              <select
-                value={sizePreset}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setSizePreset(v);
-                  if (v === "notion") { setCanvasWidth(1500); setCanvasHeight(600); }
-                  else if (v === "og") { setCanvasWidth(1200); setCanvasHeight(630); }
-                  else if (v === "twitter") { setCanvasWidth(1200); setCanvasHeight(675); }
-                  else if (v === "hd") { setCanvasWidth(1920); setCanvasHeight(1080); }
-                  else if (v === "square") { setCanvasWidth(1500); setCanvasHeight(1500); }
-                }}
-              >
-                <option value="notion">Notion (1500x600)</option>
-                <option value="og">Open Graph (1200x630)</option>
-                <option value="twitter">Twitter (1200x675)</option>
-                <option value="hd">HD (1920x1080)</option>
-                <option value="square">Square (1500x1500)</option>
-                <option value="custom">Custom</option>
-              </select>
-              {sizePreset === "custom" && (
-                <div style={{ display: "flex", gap: 10, marginTop: 10, justifyContent: "center" }}>
-                  <input type="number" value={canvasWidth} min={300} onChange={(e) => setCanvasWidth(parseInt(e.target.value) || 0)} placeholder="Width" style={{ width: 120, padding: 8, borderRadius: 8, border: "none", background: "#082032", color: "#ccc" }} />
-                  <input type="number" value={canvasHeight} min={200} onChange={(e) => setCanvasHeight(parseInt(e.target.value) || 0)} placeholder="Height" style={{ width: 120, padding: 8, borderRadius: 8, border: "none", background: "#082032", color: "#ccc" }} />
-                </div>
-              )}
-            </div>
+
 
             <div className={styles.iconTypeSetting}>
-              <h2>Title text (optional)</h2>
-              <input type="text" value={titleText} onChange={(e) => setTitleText(e.target.value)} placeholder="Enter title" style={{ width: "100%", padding: 10, borderRadius: 8, border: "none", background: "#082032", color: "#ccc" }} />
-              <div style={{ display: "flex", gap: 20, marginTop: 10, flexWrap: "wrap", alignItems: "center", justifyContent: "space-between" }}>
-                <div style={{ minWidth: 220 }}>
-                  <p style={{ color: "#ccc", margin: 0, marginBottom: 6 }}>Text color</p>
+              <h2>Title Text (Optional)</h2>
+              <input type="text" value={titleText} onChange={(e) => setTitleText(e.target.value)} placeholder="Enter title" style={{ width: "100%", padding: "var(--space-sm)", borderRadius: "var(--radius-md)", border: "1px solid var(--border-color)", background: "var(--card-bg)", color: "var(--text-primary)", marginBottom: "var(--space-md)" }} />
+              {titleText && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-lg)", alignItems: "start" }}>
+                  <div>
+                    <p style={{ color: "var(--text-secondary)", margin: 0, marginBottom: "var(--space-sm)", fontSize: "0.875rem" }}>Text color</p>
                   <ChromePicker color={titleColor as any} onChangeComplete={(c: any) => setTitleColor(c)} />
                 </div>
-                <div style={{ flex: 1 }}>
-                  <p style={{ color: "#ccc", margin: 0 }}>Font size: {titleSize}px</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-md)" }}>
+                    <div>
+                      <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.875rem" }}>Font size: {titleSize}px</p>
                   <input type="range" min="12" max="160" value={titleSize} onChange={(e) => setTitleSize(parseInt(e.target.value))} />
-                  <p style={{ color: "#ccc", margin: 0, marginTop: 10 }}>Y position: {titleYPosition}px</p>
+                    </div>
+                    <div>
+                      <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.875rem" }}>Y position: {titleYPosition}px</p>
                   <input type="range" min="0" max={canvasHeight} value={titleYPosition} onChange={(e) => setTitleYPosition(parseInt(e.target.value))} />
-                  <p style={{ color: "#ccc", margin: 0, marginTop: 10 }}>Alignment</p>
+                    </div>
+                    <div>
+                      <p style={{ color: "var(--text-secondary)", margin: 0, marginBottom: "var(--space-xs)", fontSize: "0.875rem" }}>Alignment</p>
                   <select value={titleXAlign} onChange={(e) => setTitleXAlign(e.target.value as any)}>
                     <option value="left">Left</option>
                     <option value="center">Center</option>
@@ -553,13 +561,29 @@ export default function Home() {
                   </select>
                 </div>
               </div>
+              </div>
+              )}
             </div>
 
             <div className={styles.iconTypeSetting}>
-              <h2>Shape overlay</h2>
-              <label style={{ color: "#ccc" }}>
-                <input type="checkbox" checked={shapeEnabled} onChange={(e) => setShapeEnabled(e.target.checked)} /> Enable
+              <h2>Effects & Overlays</h2>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)", marginBottom: "var(--space-md)" }}>
+                <label style={{ color: "var(--text-secondary)", fontSize: "0.875rem", display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>
+                  <input type="checkbox" checked={shapeEnabled} onChange={(e) => setShapeEnabled(e.target.checked)} /> Shape overlay
+                </label>
+                <label style={{ color: "var(--text-secondary)", fontSize: "0.875rem", display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>
+                  <input type="checkbox" checked={noiseEnabled} onChange={(e) => setNoiseEnabled(e.target.checked)} /> Noise texture
+                </label>
+                <label style={{ color: "var(--text-secondary)", fontSize: "0.875rem", display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>
+                  <input type="checkbox" checked={softShadowEnabled} onChange={(e) => setSoftShadowEnabled(e.target.checked)} /> Soft shadow
+                </label>
+                <label style={{ color: "var(--text-secondary)", fontSize: "0.875rem", display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>
+                  <input type="checkbox" checked={borderEnabled} onChange={(e) => setBorderEnabled(e.target.checked)} /> Border
+                </label>
+                <label style={{ color: "var(--text-secondary)", fontSize: "0.875rem", display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>
+                  <input type="checkbox" checked={glassEnabled} onChange={(e) => setGlassEnabled(e.target.checked)} /> Glass panel
               </label>
+              </div>
               {shapeEnabled && (
                 <div className={styles.iconPatternSetting}>
                   <h2>Type</h2>
@@ -578,94 +602,96 @@ export default function Home() {
               )}
             </div>
 
-            <div className={styles.iconTypeSetting}>
-              <h2>Noise</h2>
-              <label style={{ color: "#ccc" }}>
-                <input type="checkbox" checked={noiseEnabled} onChange={(e) => setNoiseEnabled(e.target.checked)} /> Enable
-              </label>
               {noiseEnabled && (
-                <div className={styles.iconPatternSetting}>
-                  <h2>Opacity: {Math.round(noiseOpacity * 100)}%</h2>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)", padding: "var(--space-md)", background: "var(--accent-bg)", borderRadius: "var(--radius-md)", marginBottom: "var(--space-sm)" }}>
+                  <div>
+                    <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.875rem" }}>Noise Opacity: {Math.round(noiseOpacity * 100)}%</p>
                   <input type="range" min="0" max="0.5" step="0.01" value={noiseOpacity} onChange={(e) => setNoiseOpacity(parseFloat(e.target.value))} />
-                  <h2>Scale</h2>
+                  </div>
+                  <div>
+                    <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.875rem" }}>Noise Scale: {noiseScale}</p>
                   <input type="range" min="1" max="10" step="0.5" value={noiseScale} onChange={(e) => setNoiseScale(parseFloat(e.target.value))} />
+                  </div>
+                </div>
+              )}
+              {softShadowEnabled && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)", padding: "var(--space-md)", background: "var(--accent-bg)", borderRadius: "var(--radius-md)", marginBottom: "var(--space-sm)" }}>
+                  <div>
+                    <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.875rem" }}>Shadow Blur: {softShadowBlur}px</p>
+                    <input type="range" min="0" max="30" value={softShadowBlur} onChange={(e) => setSoftShadowBlur(parseInt(e.target.value))} />
+            </div>
+                <div>
+                    <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.875rem" }}>Shadow Offset: {softShadowOffset}px</p>
+                      <input type="range" min="0" max="30" value={softShadowOffset} onChange={(e) => setSoftShadowOffset(parseInt(e.target.value))} />
+                    </div>
+                </div>
+              )}
+              {borderEnabled && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "var(--space-md)", padding: "var(--space-md)", background: "var(--accent-bg)", borderRadius: "var(--radius-md)", marginBottom: "var(--space-sm)" }}>
+                <div>
+                    <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.875rem" }}>Width: {borderWidth}px</p>
+                      <input type="range" min="1" max="40" value={borderWidth} onChange={(e) => setBorderWidth(parseInt(e.target.value))} />
+                  </div>
+                  <div>
+                    <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.875rem" }}>Radius: {borderRadius}px</p>
+                      <input type="range" min="0" max="120" value={borderRadius} onChange={(e) => setBorderRadius(parseInt(e.target.value))} />
+                  </div>
+                  <div>
+                    <p style={{ color: "var(--text-secondary)", margin: 0, marginBottom: "var(--space-xs)", fontSize: "0.875rem" }}>Color</p>
+                      <ChromePicker color={borderColor as any} onChangeComplete={(c: any) => setBorderColor(c)} />
+                    </div>
+                </div>
+              )}
+              {glassEnabled && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)", padding: "var(--space-md)", background: "var(--accent-bg)", borderRadius: "var(--radius-md)" }}>
+                <div>
+                    <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.875rem" }}>Opacity: {Math.round(glassOpacity * 100)}%</p>
+                      <input type="range" min="0" max="0.6" step="0.01" value={glassOpacity} onChange={(e) => setGlassOpacity(parseFloat(e.target.value))} />
+                  </div>
+                  <div>
+                    <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.875rem" }}>Radius: {glassRadius}px</p>
+                      <input type="range" min="0" max="120" value={glassRadius} onChange={(e) => setGlassRadius(parseInt(e.target.value))} />
+                    </div>
                 </div>
               )}
             </div>
 
-            <div className={styles.iconTypeSetting}>
-              <h2>Effects</h2>
-              <div style={{ display: "grid", gap: 12 }}>
-                <div>
-                  <label style={{ color: "#ccc" }}>
-                    <input type="checkbox" checked={softShadowEnabled} onChange={(e) => setSoftShadowEnabled(e.target.checked)} /> Soft shadow
-                  </label>
-                  {softShadowEnabled && (
-                    <div className={styles.iconPatternSetting}>
-                      <h2>Blur: {softShadowBlur}px</h2>
-                      <input type="range" min="0" max="30" value={softShadowBlur} onChange={(e) => setSoftShadowBlur(parseInt(e.target.value))} />
-                      <h2>Offset: {softShadowOffset}px</h2>
-                      <input type="range" min="0" max="30" value={softShadowOffset} onChange={(e) => setSoftShadowOffset(parseInt(e.target.value))} />
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label style={{ color: "#ccc" }}>
-                    <input type="checkbox" checked={borderEnabled} onChange={(e) => setBorderEnabled(e.target.checked)} /> Border
-                  </label>
-                  {borderEnabled && (
-                    <div className={styles.iconPatternSetting}>
-                      <h2>Width: {borderWidth}px</h2>
-                      <input type="range" min="1" max="40" value={borderWidth} onChange={(e) => setBorderWidth(parseInt(e.target.value))} />
-                      <h2>Radius: {borderRadius}px</h2>
-                      <input type="range" min="0" max="120" value={borderRadius} onChange={(e) => setBorderRadius(parseInt(e.target.value))} />
-                      <p style={{ color: "#ccc", margin: 0, marginTop: 8 }}>Border color</p>
-                      <ChromePicker color={borderColor as any} onChangeComplete={(c: any) => setBorderColor(c)} />
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label style={{ color: "#ccc" }}>
-                    <input type="checkbox" checked={glassEnabled} onChange={(e) => setGlassEnabled(e.target.checked)} /> Glass panel
-                  </label>
-                  {glassEnabled && (
-                    <div className={styles.iconPatternSetting}>
-                      <h2>Opacity: {Math.round(glassOpacity * 100)}%</h2>
-                      <input type="range" min="0" max="0.6" step="0.01" value={glassOpacity} onChange={(e) => setGlassOpacity(parseFloat(e.target.value))} />
-                      <h2>Radius: {glassRadius}px</h2>
-                      <input type="range" min="0" max="120" value={glassRadius} onChange={(e) => setGlassRadius(parseInt(e.target.value))} />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.downloadBtnWraper}>
-              <button className={styles.downloadBtn} onClick={handleDownloadSvg}>
-                <img src="/assets/svg.svg" alt="download icon" width={20} /> Download SVG
-              </button>
-              <button className={styles.downloadBtn} onClick={handleDownloadPng}>
-                <img src="/assets/image-logo.svg" alt="download icon" width={20} /> PNG
-              </button>
-              <button className={styles.downloadBtn} onClick={() => handleServerDownload("png")}>
-                <img src="/assets/image-logo.svg" alt="download icon" width={20} /> Server PNG
-              </button>
-              <button className={styles.downloadBtn} onClick={() => handleServerDownload("webp")}>
-                <img src="/assets/image-logo.svg" alt="download icon" width={20} /> WebP
-              </button>
-            </div>
-          </div>
-
           <div className={styles.previewSection}>
             <h2>Preview</h2>
             <div className={styles.previewBoxWrapper}>
-              <div className={styles.previewBox} dangerouslySetInnerHTML={{ __html: generatedCoverSvg }} />
+              <div className={styles.previewBox}>
+                <div className={styles.previewSvg} dangerouslySetInnerHTML={{ __html: generatedCoverSvg }} />
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.actionsSection}>
+            <h2>Download</h2>
+            <div className={styles.downloadBtnWraper}>
+              <button className={styles.downloadBtn} onClick={handleDownloadSvg}>
+                <span style={{display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap'}}>
+                  <img src="/assets/svg.svg" alt="download icon" width={20} /> Download SVG
+                </span>
+              </button>
+              <button className={styles.downloadBtn} onClick={handleDownloadPng}>
+                <span style={{display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap'}}>
+                  <img src="/assets/image-logo.svg" alt="download icon" width={20} /> PNG
+                </span>
+              </button>
+              <button className={styles.downloadBtn} onClick={() => handleServerDownload("png")}>
+                <span style={{display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap'}}>
+                  <img src="/assets/image-logo.svg" alt="download icon" width={20} /> Server PNG
+                </span>
+              </button>
+              <button className={styles.downloadBtn} onClick={() => handleServerDownload("webp")}>
+                <span style={{display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap'}}>
+                  <img src="/assets/image-logo.svg" alt="download icon" width={20} /> WebP
+                </span>
+              </button>
             </div>
           </div>
         </div>
       </main>
-    </>
+    </div>
   );
 }

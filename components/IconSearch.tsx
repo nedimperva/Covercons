@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Fuse from "fuse.js";
 import useDebounce from "../lib/useDebounce";
 import Icon from "./Icon";
@@ -12,23 +12,23 @@ type Props = {
 };
 
 function IconSearch({ setSelectedIconName, setSelectedIconVersion, pack = "google" }: Props) {
-  const [fuse, setFuse] = useState<Fuse<IconMeta> | undefined>();
+  const [fuse, setFuse] = useState<any | undefined>();
   const [results, setResults] = useState<IconMeta[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const debouncedSearchTerm = useDebounce(searchTerm, 100);
 
   useEffect(() => {
-    let fetchMetaData = async () => {
+    const fetchMetaData = async () => {
       if (pack === "google") {
         const response = await fetch(`/api/icons-metadata`);
         const body = await response.text();
         const metadata = JSON.parse(body.replace(`)]}'`, ""));
-        const initFuse = new Fuse<IconMeta>(metadata.icons, { keys: ["name", "tags"] });
+        const initFuse = new Fuse(metadata.icons, { keys: ["name", "tags"] });
         setFuse(initFuse);
       } else {
         const response = await fetch(`/api/local-icons/metadata?pack=lucide`);
         const metadata = await response.json();
-        const initFuse = new Fuse<IconMeta>(metadata.icons, { keys: ["name", "tags"] });
+        const initFuse = new Fuse(metadata.icons, { keys: ["name", "tags"] });
         setFuse(initFuse);
       }
     };
@@ -38,12 +38,12 @@ function IconSearch({ setSelectedIconName, setSelectedIconVersion, pack = "googl
   useEffect(() => {
     if (fuse && debouncedSearchTerm?.length > 1 && debouncedSearchTerm?.length < 15) {
       // PASS THE TERM TO OUR FUSE
-      let currentResults = fuse
+      const currentResults = fuse
         .search(debouncedSearchTerm)
         .map((result) => result.item as IconMeta);
 
       // SPLICE THE LARGE RESULT
-      let splicedCurrentResult = currentResults.splice(0, 20);
+      const splicedCurrentResult = currentResults.splice(0, 20);
 
       // STORE SPLICED RESULT IN STATE
       setResults(splicedCurrentResult);
@@ -99,7 +99,7 @@ function IconSearch({ setSelectedIconName, setSelectedIconVersion, pack = "googl
       <style jsx global>{`
         .iconSearch {
           width: 100%;
-          margin-bottom: 10px;
+          margin-bottom: var(--space-sm);
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -108,61 +108,75 @@ function IconSearch({ setSelectedIconName, setSelectedIconVersion, pack = "googl
         .iconSearch__container {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: var(--space-sm);
           width: 100%;
-          background-color: #fff;
-          padding: 10px 20px;
+          background-color: var(--card-bg);
+          border: 1px solid var(--border-color);
+          padding: var(--space-sm) var(--space-md);
           z-index: 9;
-          border-radius: 5px;
-          margin-bottom: 20px;
+          border-radius: var(--radius-md);
+          margin-bottom: var(--space-md);
+          transition: all 0.2s ease-in-out;
+        }
+        .iconSearch__container:focus-within {
+          border-color: var(--accent-primary);
+          box-shadow: 0 0 0 3px var(--accent-light);
         }
         .iconSearch__container svg {
-          fill: #555;
-          height: 30px;
-          width: 30px;
+          fill: var(--text-secondary);
+          height: 24px;
+          width: 24px;
         }
         .iconSearch input {
-          background-color: #fff;
+          background-color: transparent;
           width: 100%;
           height: 100%;
-          padding: 2px 0 0 0;
+          padding: 0;
           outline: none;
           border: none;
-          font-size: 1.3rem;
-          color: #222;
-          font-weight: 600;
+          font-size: 1rem;
+          color: var(--text-primary);
+          font-weight: 500;
+        }
+        .iconSearch input::placeholder {
+          color: var(--text-tertiary);
         }
         .iconSearch__autoCompleteItemsWrapper {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(50px, 0.5fr));
-          grid-gap: 1rem;
-          background-color: #333;
-          padding: 20px;
-          margin-bottom: 10px;
+          grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+          gap: var(--space-sm);
+          background-color: var(--card-bg);
+          border: 1px solid var(--border-color);
+          padding: var(--space-md);
+          margin-bottom: var(--space-sm);
           width: 100%;
-          border-radius: 10px;
+          border-radius: var(--radius-lg);
+          box-shadow: var(--shadow-md);
+          backdrop-filter: blur(10px);
         }
         .iconSearch__autoCompleteItem {
           display: flex;
           flex-direction: column;
           align-items: center;
-          background-color: #161616;
-          border-radius: 8px;
-          padding: 10px 20px;
-          color: #fff;
+          background-color: var(--accent-bg);
+          border-radius: var(--radius-md);
+          padding: var(--space-sm) var(--space-md);
+          color: var(--text-primary);
           cursor: pointer;
           transition: all 0.2s ease-in-out;
+          border: 1px solid transparent;
         }
         .iconSearch__autoCompleteItem:hover {
-          background-color: #222;
-          transform: scale(1.1);
+          background-color: var(--accent-primary);
+          border-color: var(--accent-primary);
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-sm);
         }
         .iconSearch__autoCompleteItem:active {
-          background-color: #141414;
-          transform: scale(0.9);
+          transform: translateY(0);
         }
         .iconSearch__autoCompleteItem svg {
-          fill: #fff;
+          fill: var(--text-primary);
         }
         @media only screen and (max-width: 700px) {
           .iconSearch input {
