@@ -12,7 +12,7 @@ import IconSearch from "../components/IconSearch";
 
 export default function Home() {
   const downloadHelper_a_tag = React.useRef<HTMLAnchorElement | null>(null);
-  const [width] = useWindowSize();
+  const [_width] = useWindowSize();
 
   const [svg, setSvg] = React.useState<string | null>(null);
   const [svg2, setSvg2] = React.useState<string | null>(null);
@@ -24,10 +24,10 @@ export default function Home() {
   const [sizePreset, setSizePreset] = React.useState("notion");
   const [canvasWidth, setCanvasWidth] = React.useState(1500);
   const [canvasHeight, setCanvasHeight] = React.useState(600);
-  const [iconPatternSpacing, setIconPatternSpacing] = React.useState<any>(25);
-  const [iconPatternSize, setIconPatternSize] = React.useState<any>(2);
-  const [iconPatternRotation, setIconPatternRotation] = React.useState<any>(330);
-  const [iconPatternShade, setIconPatternShade] = React.useState<any>(-25);
+  const [iconPatternSpacing, setIconPatternSpacing] = React.useState<number>(25);
+  const [iconPatternSize, setIconPatternSize] = React.useState<number>(2);
+  const [iconPatternRotation, setIconPatternRotation] = React.useState<number>(330);
+  const [iconPatternShade, setIconPatternShade] = React.useState<number>(-25);
   const [showAdvancedSettings, setShowAdvancedSettings] = React.useState(false);
   const [selectedIconName, setSelectedIconName] = React.useState("rocket");
   const [selectedIconVersion, setSelectedIconVersion] = React.useState(1);
@@ -60,7 +60,7 @@ export default function Home() {
   const [palettePreset, setPalettePreset] = React.useState("custom");
 
   const iconColor = React.useMemo(() => {
-    if (tinycolor(bgColor.hex).getBrightness() > 200) {
+    if (bgColor.hex && tinycolor(bgColor.hex).getBrightness() > 200) {
       const darkColour = shadeColor(bgColor.hex.substring(1), -50);
       return darkColour;
     } else return "#ffffffaf";
@@ -202,7 +202,7 @@ export default function Home() {
       if (!shapeEnabled) return "";
       const midX = canvasWidth / 2;
       const midY = canvasHeight / 2;
-      const fill = tinycolor(bgColor.hex).lighten(10).setAlpha(shapeOpacity).toRgbString();
+      const fill = tinycolor(bgColor.hex || "#000000").lighten(10).setAlpha(shapeOpacity).toRgbString();
       const scale = shapeScale;
       if (shapeType === "circle") {
         const r = Math.max(canvasWidth, canvasHeight) * 0.35 * scale;
@@ -239,12 +239,12 @@ export default function Home() {
     if (coverType == "iconpattern" && svg) {
       setGeneratedCoverSvg(
         `<svg version=\"1.1\"
-        baseProfile=\"full\" 
-        width=\"${canvasWidth}\" height=\"${canvasHeight}\"\n        viewBox=\"0 0 ${canvasWidth} ${canvasHeight}\"\n        preserveAspectRatio=\"xMidYMid meet\"\n        xmlns=\"http://www.w3.org/2000/svg\">\n        ${bgLayer()}\n        <rect width=\"100%\" height=\"100%\" fill=\"url(#pattern)\"/>\n        ${shapeLayer()}\n        ${noiseLayer()}\n        ${borderLayer()}\n        ${glassLayer()}\n        <defs>\n          <pattern id=\"pattern\" x=\"0\" y=\"0\" width=\"${iconPatternSpacing}\" height=\"${iconPatternSpacing}\" patternTransform=\"rotate(${iconPatternRotation}) scale(${iconPatternSize})\" patternUnits=\"userSpaceOnUse\">\n            <g>\n              ${cleanedSvg(shadeColor(bgColor.hex.substring(1), parseInt(iconPatternShade)))}\n            </g>\n            <g transform=\"translate(12,12)\">\n              ${cleanedSvg2(shadeColor(bgColor.hex.substring(1), parseInt(iconPatternShade) + 15))}\n            </g>\n          </pattern>\n        </defs>\n        ${titleLayer()}\n      </svg>\n      `
+        baseProfile=\"full\"
+        width=\"${canvasWidth.toString()}\" height=\"${canvasHeight.toString()}\"\n        viewBox=\"0 0 ${canvasWidth.toString()} ${canvasHeight.toString()}\"\n        preserveAspectRatio=\"xMidYMid meet\"\n        xmlns=\"http://www.w3.org/2000/svg\">\n        ${bgLayer()}\n        <rect width=\"100%\" height=\"100%\" fill=\"url(#pattern)\"/>\n        ${shapeLayer()}\n        ${noiseLayer()}\n        ${borderLayer()}\n        ${glassLayer()}\n        <defs>\n          <pattern id=\"pattern\" x=\"0\" y=\"0\" width=\"${iconPatternSpacing.toString()}\" height=\"${iconPatternSpacing.toString()}\" patternTransform=\"rotate(${iconPatternRotation.toString()}) scale(${iconPatternSize.toString()})\" patternUnits=\"userSpaceOnUse\">\n            <g>\n              ${cleanedSvg(shadeColor(bgColor.hex.substring(1), iconPatternShade))}\n            </g>\n            <g transform=\"translate(12,12)\">\n              ${cleanedSvg2(shadeColor(bgColor.hex.substring(1), iconPatternShade + 15))}\n            </g>\n          </pattern>\n        </defs>\n        ${titleLayer()}\n      </svg>\n      `
       );
     } else if (coverType == "singlemiddleicon" && svg) {
       setGeneratedCoverSvg(
-        `<svg version=\"1.1\"\n          baseProfile=\"full\"\n          viewBox=\"0 0 ${canvasWidth} ${canvasHeight}\"\n          width=\"${canvasWidth}\" height=\"${canvasHeight}\"\n          preserveAspectRatio=\"xMidYMid meet\"\n          xmlns=\"http://www.w3.org/2000/svg\">\n          ${bgLayer()}\n          ${shapeLayer()}\n          ${noiseLayer()}\n          ${borderLayer()}\n          ${glassLayer()}\n          ${softShadowDefs()}\n          <g transform=\"translate(${iconX}, ${iconY}) scale(${iconScale})\" id=\"center_icon\"${softShadowEnabled ? ' filter=\"url(#softshadow)\"' : ''}>${cleanedSvg(iconColor)}</g>\n          ${titleLayer()}\n         </svg>`
+        `<svg version=\"1.1\"\n          baseProfile=\"full\"\n          viewBox=\"0 0 ${canvasWidth.toString()} ${canvasHeight.toString()}\"\n          width=\"${canvasWidth.toString()}\" height=\"${canvasHeight.toString()}\"\n          preserveAspectRatio=\"xMidYMid meet\"\n          xmlns=\"http://www.w3.org/2000/svg\">\n          ${bgLayer()}\n          ${shapeLayer()}\n          ${noiseLayer()}\n          ${borderLayer()}\n          ${glassLayer()}\n          ${softShadowDefs()}\n          <g transform=\"translate(${iconX.toString()}, ${iconY.toString()}) scale(${iconScale.toString()})\" id=\"center_icon\"${softShadowEnabled ? ' filter=\"url(#softshadow)\"' : ''}>${cleanedSvg(iconColor)}</g>\n          ${titleLayer()}\n         </svg>`
       );
     }
   }, [
@@ -289,23 +289,23 @@ export default function Home() {
     const blob = new Blob([generatedCoverSvg]);
     if (!downloadHelper_a_tag.current) return;
     downloadHelper_a_tag.current.download = `covercon_${selectedIconName}_${coverType}.svg`;
-    downloadHelper_a_tag.current.href = window.URL.createObjectURL(blob);
+    downloadHelper_a_tag.current.href = URL.createObjectURL(blob);
     downloadHelper_a_tag.current.click();
   };
 
-  const handleDownloadPng = async () => {
+  const handleDownloadPng = () => {
     SVGToImage({
-      svg: generatedCoverSvg as any,
+      svg: generatedCoverSvg as string,
       mimetype: "image/png",
       width: canvasWidth * 2,
       height: canvasHeight * 2,
       quality: 1,
       outputFormat: "blob",
     })
-      .then(function (blob: any) {
+      .then(function (blob: Blob) {
         if (!downloadHelper_a_tag.current) return;
         downloadHelper_a_tag.current.download = `covercon_${selectedIconName}_${coverType}_${canvasWidth}x${canvasHeight}.png`;
-        downloadHelper_a_tag.current.href = window.URL.createObjectURL(blob);
+        downloadHelper_a_tag.current.href = URL.createObjectURL(blob);
         downloadHelper_a_tag.current.click();
       })
       .catch(function (err) {
@@ -324,9 +324,9 @@ export default function Home() {
       const blob = await resp.blob();
       if (!downloadHelper_a_tag.current) return;
       downloadHelper_a_tag.current.download = `covercon_${selectedIconName}_${coverType}_${canvasWidth}x${canvasHeight}.${format}`;
-      downloadHelper_a_tag.current.href = window.URL.createObjectURL(blob);
+      downloadHelper_a_tag.current.href = URL.createObjectURL(blob);
       downloadHelper_a_tag.current.click();
-    } catch (e) {
+    } catch (_e) {
       alert("Server render failed");
     }
   };
@@ -367,7 +367,7 @@ export default function Home() {
                     const v = e.target.value;
                     setPalettePreset(v);
                     if (v === "custom") return;
-                    const presets: any = {
+                    const presets: Record<string, any> = {
                       ocean: { mode: "gradient", from: "#3A95FF", to: "#6EE7F9", angle: 45 },
                       sunset: { mode: "gradient", from: "#FF7E5F", to: "#FEB47B", angle: 30 },
                       mint: { mode: "solid", color: "#10B981" },
@@ -403,11 +403,11 @@ export default function Home() {
               {bgMode === "solid" && (
                 <div className={styles.modifierSettings__colorSelect}>
                   <h2>Select background color</h2>
-                  <ChromePicker color={bgColor as any} onChangeComplete={(color: any) => setBgColor(color)} />
+                  <ChromePicker color={bgColor} onChangeComplete={(color) => setBgColor(color)} />
                   <p className={styles.notionColours}>Notion Colours</p>
                   <CirclePicker
-                    color={bgColor as any}
-                    onChangeComplete={(color: any) => setBgColor(color)}
+                    color={bgColor}
+                    onChangeComplete={(color) => setBgColor(color)}
                     className={styles.circlePicker}
                     colors={["#9B9A97", "#64473A", "#D9730D", "#DFAB01", "#0F7B6C", "#0B6E99", "#6940A5", "#AD1A72", "#E03E3E"]}
                   />
@@ -416,18 +416,18 @@ export default function Home() {
               {bgMode === "gradient" && (
                 <div className={styles.modifierSettings__colorSelect}>
                   <h2>Gradient colors</h2>
-                  <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)", width: "100%" }}>
                     <div>
-                      <p style={{ color: "#ccc" }}>From</p>
-                      <ChromePicker color={bgGradient.from as any} onChangeComplete={(color: any) => setBgGradient((g) => ({ ...g, from: color }))} />
+                      <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-sm)", fontSize: "0.875rem" }}>From</p>
+                      <ChromePicker color={bgGradient.from} onChangeComplete={(color) => setBgGradient((g) => ({ ...g, from: color }))} />
                     </div>
                     <div>
-                      <p style={{ color: "#ccc" }}>To</p>
-                      <ChromePicker color={bgGradient.to as any} onChangeComplete={(color: any) => setBgGradient((g) => ({ ...g, to: color }))} />
+                      <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-sm)", fontSize: "0.875rem" }}>To</p>
+                      <ChromePicker color={bgGradient.to} onChangeComplete={(color) => setBgGradient((g) => ({ ...g, to: color }))} />
                     </div>
                   </div>
-                  <div className={styles.iconPatternSetting} style={{ marginTop: 10 }}>
-                    <h2>Angle</h2>
+                  <div style={{ marginTop: "var(--space-md)", width: "100%" }}>
+                    <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-sm)", fontSize: "0.875rem" }}>Angle: {bgGradient.angle}°</p>
                     <input type="range" min="0" max="360" value={bgGradient.angle} onChange={(e) => setBgGradient((g) => ({ ...g, angle: parseInt(e.target.value) }))} />
                   </div>
                 </div>
@@ -489,31 +489,31 @@ export default function Home() {
                     <h2>Select Spacing between Icons</h2>
                     <div className={styles.iconPaternSettingDisplayValue}>
                       Spacing: {iconPatternSpacing}
-                      <span className={styles.defaultChanger} onClick={() => setIconPatternSpacing(25)}>{"("}default 25{")"}</span>
+                      <span className={styles.defaultChanger} onClick={() => setIconPatternSpacing(25)}>(default 25)</span>
                     </div>
-                    <input type="range" name="icon_spacing" value={iconPatternSpacing} min="20" max="80" onChange={(e) => setIconPatternSpacing(e.target.value)} />
+                    <input type="range" name="icon_spacing" value={iconPatternSpacing} min="20" max="80" onChange={(e) => setIconPatternSpacing(Number(e.target.value))} />
                   </motion.div>
 
                   <motion.div variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }} className={styles.iconPatternSetting}>
                     <h2>Select Icons size in Pattern</h2>
                     <div className={styles.iconPaternSettingDisplayValue}>
-                      Icon Size: {iconPatternSize} <span className={styles.defaultChanger} onClick={() => setIconPatternSize(2)}>{"("}default 2{")"}</span>
+                      Icon Size: {iconPatternSize} <span className={styles.defaultChanger} onClick={() => setIconPatternSize(2)}>(default 2)</span>
                     </div>
-                    <input type="range" name="icon_size" value={iconPatternSize} min="1" max="30" onChange={(e) => setIconPatternSize(e.target.value)} />
+                    <input type="range" name="icon_size" value={iconPatternSize} min="1" max="30" onChange={(e) => setIconPatternSize(Number(e.target.value))} />
                   </motion.div>
 
                   <motion.div variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }} className={styles.iconPatternSetting}>
                     <h2>Select Rotation in Pattern</h2>
                     <div className={styles.iconPaternSettingDisplayValue}>
                       Rotation : {iconPatternRotation}
-                      <span className={styles.defaultChanger} onClick={() => setIconPatternRotation(330)}>{"("}default 330{")"}</span>
+                      <span className={styles.defaultChanger} onClick={() => setIconPatternRotation(330)}>(default 330)</span>
                     </div>
-                    <input type="range" name="icon_size" value={iconPatternRotation} min="0" max="360" onChange={(e) => setIconPatternRotation(e.target.value)} />
+                    <input type="range" name="icon_size" value={iconPatternRotation} min="0" max="360" onChange={(e) => setIconPatternRotation(Number(e.target.value))} />
                   </motion.div>
 
                   <motion.div variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }} className={styles.iconPatternSetting}>
                     <h2>Select icon shade in Pattern</h2>
-                    <select onChange={(e) => setIconPatternShade(e.target.value)}>
+                    <select onChange={(e) => setIconPatternShade(Number(e.target.value))}>
                       <option value={-25}>Dark (default)</option>
                       <option value={28}>Light</option>
                     </select>
@@ -538,12 +538,12 @@ export default function Home() {
               <h2>Title Text (Optional)</h2>
               <input type="text" value={titleText} onChange={(e) => setTitleText(e.target.value)} placeholder="Enter title" style={{ width: "100%", padding: "var(--space-sm)", borderRadius: "var(--radius-md)", border: "1px solid var(--border-color)", background: "var(--card-bg)", color: "var(--text-primary)", marginBottom: "var(--space-md)" }} />
               {titleText && (
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-lg)", alignItems: "start" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)", alignItems: "start" }}>
                   <div>
                     <p style={{ color: "var(--text-secondary)", margin: 0, marginBottom: "var(--space-sm)", fontSize: "0.875rem" }}>Text color</p>
-                  <ChromePicker color={titleColor as any} onChangeComplete={(c: any) => setTitleColor(c)} />
+                  <ChromePicker color={titleColor} onChangeComplete={(c) => setTitleColor(c)} />
                 </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-md)" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-sm)" }}>
                     <div>
                       <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.875rem" }}>Font size: {titleSize}px</p>
                   <input type="range" min="12" max="160" value={titleSize} onChange={(e) => setTitleSize(parseInt(e.target.value))} />
@@ -567,7 +567,7 @@ export default function Home() {
 
             <div className={styles.iconTypeSetting}>
               <h2>Effects & Overlays</h2>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)", marginBottom: "var(--space-md)" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-sm)", marginBottom: "var(--space-sm)" }}>
                 <label style={{ color: "var(--text-secondary)", fontSize: "0.875rem", display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>
                   <input type="checkbox" checked={shapeEnabled} onChange={(e) => setShapeEnabled(e.target.checked)} /> Shape overlay
                 </label>
@@ -638,7 +638,7 @@ export default function Home() {
                   </div>
                   <div>
                     <p style={{ color: "var(--text-secondary)", margin: 0, marginBottom: "var(--space-xs)", fontSize: "0.875rem" }}>Color</p>
-                      <ChromePicker color={borderColor as any} onChangeComplete={(c: any) => setBorderColor(c)} />
+                      <ChromePicker color={borderColor} onChangeComplete={(c) => setBorderColor(c)} />
                     </div>
                 </div>
               )}
@@ -668,22 +668,22 @@ export default function Home() {
           <div className={styles.actionsSection}>
             <h2>Download</h2>
             <div className={styles.downloadBtnWraper}>
-              <button className={styles.downloadBtn} onClick={handleDownloadSvg}>
+              <button type="button" className={styles.downloadBtn} onClick={handleDownloadSvg}>
                 <span style={{display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap'}}>
                   <img src="/assets/svg.svg" alt="download icon" width={20} /> Download SVG
                 </span>
               </button>
-              <button className={styles.downloadBtn} onClick={handleDownloadPng}>
+              <button type="button" className={styles.downloadBtn} onClick={handleDownloadPng}>
                 <span style={{display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap'}}>
                   <img src="/assets/image-logo.svg" alt="download icon" width={20} /> PNG
                 </span>
               </button>
-              <button className={styles.downloadBtn} onClick={() => handleServerDownload("png")}>
+              <button type="button" className={styles.downloadBtn} onClick={() => handleServerDownload("png")}>
                 <span style={{display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap'}}>
                   <img src="/assets/image-logo.svg" alt="download icon" width={20} /> Server PNG
                 </span>
               </button>
-              <button className={styles.downloadBtn} onClick={() => handleServerDownload("webp")}>
+              <button type="button" className={styles.downloadBtn} onClick={() => handleServerDownload("webp")}>
                 <span style={{display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap'}}>
                   <img src="/assets/image-logo.svg" alt="download icon" width={20} /> WebP
                 </span>

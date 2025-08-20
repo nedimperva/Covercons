@@ -1,6 +1,6 @@
 .main {
   max-width: 1400px;
-  padding: var(--space-sm);
+  padding: var(--space-md);
   margin: 0 auto;
   flex: 1;
   display: flex;
@@ -16,7 +16,7 @@
 }
 .wrapper {
   display: grid;
-  grid-template-columns: minmax(320px, 350px) 1fr;
+  grid-template-columns: minmax(300px, 380px) 1fr;
   grid-template-areas:
     "settings preview"
     "settings actions";
@@ -24,7 +24,7 @@
   width: 100%;
   max-width: 1400px;
   align-items: start;
-  padding: var(--space-sm) 0;
+  padding: var(--space-md) 0;
   height: auto;
   overflow: hidden;
 }
@@ -32,12 +32,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: var(--space-lg);
+  gap: var(--space-md);
   line-height: 1.15;
   font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 800;
   margin: 0;
-  padding: var(--space-lg) 0 var(--space-md) 0;
+  padding: var(--space-md) 0 var(--space-sm) 0;
   color: var(--text-primary);
   width: 100%;
   grid-column: 1 / -1;
@@ -67,7 +67,7 @@
   width: 100%;
   height: 100%;
   overflow-y: auto;
-  padding-right: var(--space-sm);
+  padding-right: var(--space-md);
 }
 .modifierSettings h2 {
   border-bottom: 1px solid var(--border-color);
@@ -85,7 +85,7 @@
   margin-bottom: 0;
   text-align: left;
   color: var(--text-secondary);
-  padding: var(--space-lg);
+  padding: var(--space-md);
   background-color: var(--card-bg);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
@@ -163,8 +163,9 @@
 .modifierSettings__colorSelect {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: var(--space-md);
 }
 .opensInNewTabMsg {
   text-align: center;
@@ -212,11 +213,11 @@
   grid-area: preview;
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
-  justify-content: flex-end;
+  gap: var(--space-sm);
+  justify-content: flex-start;
   align-items: center;
   overflow: visible;
-  padding-bottom: 0;
+  padding: var(--space-md) 0;
 }
 
 .previewBoxWrapper {
@@ -231,13 +232,13 @@
 .previewBox {
   max-width: 100%;
   margin: 0;
-  padding: var(--space-lg);
+  padding: var(--space-md);
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 180px;
-  max-height: 220px;
+  min-height: 200px;
+  max-height: 280px;
   background: var(--card-bg);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
@@ -249,12 +250,13 @@
 .previewSection .previewBox {
   max-width: 100%;
   margin: 0;
-  padding: var(--space-lg);
+  padding: var(--space-md);
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 250px;
+  min-height: 280px;
+  max-height: 320px;
 }
 
 .previewBox:hover {
@@ -288,7 +290,7 @@
   display: flex;
   flex-direction: row;
   gap: var(--space-md);
-  padding: 0 var(--space-md) var(--space-md) var(--space-md);
+  padding: var(--space-md);
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-lg);
@@ -367,7 +369,7 @@
 }
 .previewSvg svg {
   max-width: 90%;
-  max-height: 200px;
+  max-height: 280px;
   height: auto;
   border-radius: 8px;
 }
@@ -422,9 +424,10 @@
       "preview"
       "actions"
       "settings";
-    gap: var(--space-lg);
+    gap: var(--space-md);
     height: auto;
     overflow: visible;
+    padding: var(--space-sm) 0;
   }
 
   .previewSection,
@@ -492,7 +495,7 @@
     margin: 0 auto;
   }
   .previewSvg svg {
-    max-height: 200px;
+    max-height: 220px;
     max-width: 100%;
   }
   .errorTextWrapper {
@@ -515,10 +518,11 @@
     padding-top: 0;
   }
   .downloadBtnWraper {
-    width: 90vw;
-    max-width: 560px;
+    width: 100%;
+    max-width: 600px;
     grid-template-columns: 1fr;
     margin-top: 0;
+    padding: var(--space-sm) var(--space-lg) var(--space-sm) var(--space-lg);
   }
   .footer {
     font-size: 18px;
@@ -537,7 +541,7 @@
   .selectIconsFromGoogle,
   .iconTypeSetting,
   .iconPatternSetting {
-    padding: 20px 10px;
+    padding: var(--space-sm) var(--space-md);
     box-shadow: none;
   }
   .advancedSettingsBtn {
