@@ -16,9 +16,9 @@ export default function Home() {
 
   const [svg, setSvg] = React.useState<string | null>(null);
   const [svg2, setSvg2] = React.useState<string | null>(null);
-  const [bgColor, setBgColor] = React.useState<{ hex: string }>({ hex: "#3A95FF" });
+  const [bgColor, setBgColor] = React.useState<{ hex: string }>({ hex: "#4f8bf9" });
   const [bgMode, setBgMode] = React.useState<"solid" | "gradient">("solid");
-  const [bgGradient, setBgGradient] = React.useState({ from: { hex: "#3A95FF" }, to: { hex: "#6EE7F9" }, angle: 45 });
+  const [bgGradient, setBgGradient] = React.useState({ from: { hex: "#4f8bf9" }, to: { hex: "#5d94ff" }, angle: 45 });
   const [coverType, setCoverType] = React.useState("singlemiddleicon");
  const [generatedCoverSvg, setGeneratedCoverSvg] = React.useState("");
   const [sizePreset, setSizePreset] = React.useState("notion");
@@ -33,32 +33,32 @@ export default function Home() {
   const [selectedIconType, setSelectedIconType] = React.useState("materialicons");
  const [titleText, setTitleText] = React.useState("");
   const [titleColor, setTitleColor] = React.useState<{ hex: string }>({ hex: "#ffffff" });
-  const [titleSize, setTitleSize] = React.useState(64);
+  const [titleSize, setTitleSize] = React.useState(48);
   const [titleXAlign, setTitleXAlign] = React.useState<"left" | "center" | "right">("center");
   const [titleYPosition, setTitleYPosition] = React.useState(300);
   const [noiseEnabled, setNoiseEnabled] = React.useState(false);
-  const [noiseOpacity, setNoiseOpacity] = React.useState(0.08);
-  const [noiseScale, setNoiseScale] = React.useState(2.5);
+  const [noiseOpacity, setNoiseOpacity] = React.useState(0.05);
+  const [noiseScale, setNoiseScale] = React.useState(2);
   const [shapeEnabled, setShapeEnabled] = React.useState(false);
   const [shapeType, setShapeType] = React.useState("blob");
-  const [shapeOpacity, setShapeOpacity] = React.useState(0.18);
+  const [shapeOpacity, setShapeOpacity] = React.useState(0.1);
   const [shapeRotation, setShapeRotation] = React.useState(0);
-  const [shapeScale, setShapeScale] = React.useState(1.2);
+  const [shapeScale, setShapeScale] = React.useState(1);
   const [secondaryIconName, setSecondaryIconName] = React.useState("star");
   const [secondaryIconVersion, setSecondaryIconVersion] = React.useState(1);
   const [softShadowEnabled, setSoftShadowEnabled] = React.useState(false);
-  const [softShadowBlur, setSoftShadowBlur] = React.useState(12);
-  const [softShadowOffset, setSoftShadowOffset] = React.useState(8);
+  const [softShadowBlur, setSoftShadowBlur] = React.useState(8);
+  const [softShadowOffset, setSoftShadowOffset] = React.useState(4);
   const [borderEnabled, setBorderEnabled] = React.useState(false);
-  const [borderWidth, setBorderWidth] = React.useState(8);
-  const [borderRadius, setBorderRadius] = React.useState(24);
-  const [borderColor, setBorderColor] = React.useState<{ hex: string }>({ hex: "#FFFFFF88" });
+  const [borderWidth, setBorderWidth] = React.useState(2);
+  const [borderRadius, setBorderRadius] = React.useState(8);
+  const [borderColor, setBorderColor] = React.useState<{ hex: string }>({ hex: "#FFFFFF44" });
   const [glassEnabled, setGlassEnabled] = React.useState(false);
-  const [glassOpacity, setGlassOpacity] = React.useState(0.15);
-  const [glassRadius, setGlassRadius] = React.useState(24);
+  const [glassOpacity, setGlassOpacity] = React.useState(0.1);
+  const [glassRadius, setGlassRadius] = React.useState(8);
   const [palettePreset, setPalettePreset] = React.useState("custom");
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
-  const [expandedSections, setExpandedSections] = React.useState<Set<string>>(new Set(['icon', 'background', 'pattern']));
+  const [expandedSections, setExpandedSections] = React.useState<Set<string>>(new Set(['icon', 'background']));
 
   const iconColor = React.useMemo(() => {
     if (bgColor.hex && tinycolor(bgColor.hex).getBrightness() > 200) {
@@ -380,19 +380,18 @@ export default function Home() {
     setExpandedSections(newExpanded);
   };
 
-  const SectionHeader = ({ title, id, icon }: { title: string; id: string; icon: string }) => (
+  const SectionHeader = ({ title, id }: { title: string; id: string }) => (
     <div 
       className={styles.sectionHeader} 
       onClick={() => toggleSection(id)}
     >
       <div className={styles.sectionTitle}>
-        <span className={styles.sectionIcon}>{icon}</span>
         <h3>{title}</h3>
       </div>
       <motion.span 
         className={styles.chevron}
         animate={{ rotate: expandedSections.has(id) ? 180 : 0 }}
-        transition={{ duration: 0.2 }}
+        transition={{ duration: 0.1 }}
       >
         ▼
       </motion.span>
@@ -448,17 +447,14 @@ export default function Home() {
   const ToggleControl = ({ 
     label, 
     enabled, 
-    onChange, 
-    icon 
+    onChange
   }: {
     label: string;
     enabled: boolean;
     onChange: (enabled: boolean) => void;
-    icon?: string;
   }) => (
     <div className={styles.toggleControl}>
       <div className={styles.toggleLabel}>
-        {icon && <span className={styles.toggleIcon}>{icon}</span>}
         <span>{label}</span>
       </div>
       <label className={styles.switch}>
@@ -493,14 +489,14 @@ export default function Home() {
           <div className={styles.sidebarContent}>
                         {/* Icon Section */}
             <div className={styles.section}>
-              <SectionHeader title="Icon" id="icon" icon="🎯" />
+              <SectionHeader title="Icon" id="icon" />
               <AnimatePresence>
                 {expandedSections.has('icon') && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
+                    transition={{ duration: 0.1 }}
                     className={styles.sectionContent}
                   >
                     <div className={styles.formGroup}>
@@ -523,6 +519,52 @@ export default function Home() {
                         pack={selectedIconType.startsWith("local:") ? "lucide" : "google"}
                       />
                     </div>
+                    
+                    {/* Pattern Settings - Only shown when icon pattern is selected */}
+                    {coverType === "iconpattern" && (
+                      <div className={styles.patternSettings}>
+                        <h4>Pattern Settings</h4>
+                        <SliderControl
+                          label="Spacing"
+                          value={iconPatternSpacing}
+                          onChange={setIconPatternSpacing}
+                          min={20}
+                          max={80}
+                          onReset={() => setIconPatternSpacing(25)}
+                          resetValue={25}
+                        />
+                        <SliderControl
+                          label="Size"
+                          value={iconPatternSize}
+                          onChange={setIconPatternSize}
+                          min={1}
+                          max={30}
+                          onReset={() => setIconPatternSize(2)}
+                          resetValue={2}
+                        />
+                        <SliderControl
+                          label="Rotation"
+                          value={iconPatternRotation}
+                          onChange={setIconPatternRotation}
+                          min={0}
+                          max={360}
+                          unit="°"
+                          onReset={() => setIconPatternRotation(330)}
+                          resetValue={330}
+                        />
+                        <div className={styles.formGroup}>
+                          <label>Icon Shade</label>
+                          <select 
+                            value={iconPatternShade}
+                            onChange={(e) => setIconPatternShade(Number(e.target.value))}
+                            className={styles.select}
+                          >
+                            <option value={-25}>Dark</option>
+                            <option value={28}>Light</option>
+                          </select>
+                        </div>
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -530,14 +572,14 @@ export default function Home() {
 
             {/* Background Section */}
             <div className={styles.section}>
-              <SectionHeader title="Background" id="background" icon="🎨" />
+              <SectionHeader title="Background" id="background" />
               <AnimatePresence>
                 {expandedSections.has('background') && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
+                    transition={{ duration: 0.1 }}
                     className={styles.sectionContent}
                   >
                     <div className={styles.formGroup}>
@@ -569,12 +611,12 @@ export default function Home() {
                         className={styles.select}
                       >
                         <option value="custom">Custom</option>
-                        <option value="ocean">🌊 Ocean</option>
-                        <option value="sunset">🌅 Sunset</option>
-                        <option value="mint">🌿 Mint</option>
-                        <option value="grape">🍇 Grape</option>
-                        <option value="dark">🌑 Dark</option>
-                        <option value="light">☀️ Light</option>
+                        <option value="ocean">Ocean</option>
+                        <option value="sunset">Sunset</option>
+                        <option value="mint">Mint</option>
+                        <option value="grape">Grape</option>
+                        <option value="dark">Dark</option>
+                        <option value="light">Light</option>
                       </select>
                     </div>
 
@@ -604,7 +646,7 @@ export default function Home() {
                           <CirclePicker
                             color={bgColor}
                             onChangeComplete={(color) => setBgColor(color)}
-                            colors={["#9B9A97", "#64473A", "#D9730D", "#DFAB01", "#0F7B6C", "#0B6E99", "#6940A5", "#AD1A72", "#E03E3E"]}
+                            colors={["#4f8bf9", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#f97316", "#ec4899", "#64748b"]}
                           />
                         </div>
                       </div>
@@ -645,71 +687,7 @@ export default function Home() {
               </AnimatePresence>
             </div>
 
-            {coverType === "iconpattern" && (
-              <div className={styles.section}>
-                <SectionHeader title="Pattern Settings" id="pattern" icon="🔁" />
-                <AnimatePresence>
-                  {expandedSections.has('pattern') && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className={styles.sectionContent}
-                    >
-                      <SliderControl
-                        label="Spacing"
-                        value={iconPatternSpacing}
-                        onChange={setIconPatternSpacing}
-                        min={20}
-                        max={80}
-                        onReset={() => setIconPatternSpacing(25)}
-                        resetValue={25}
-                      />
-                      <SliderControl
-                        label="Size"
-                        value={iconPatternSize}
-                        onChange={setIconPatternSize}
-                        min={1}
-                        max={30}
-                        onReset={() => setIconPatternSize(2)}
-                        resetValue={2}
-                      />
-                      <SliderControl
-                        label="Rotation"
-                        value={iconPatternRotation}
-                        onChange={setIconPatternRotation}
-                        min={0}
-                        max={360}
-                        unit="°"
-                        onReset={() => setIconPatternRotation(330)}
-                        resetValue={330}
-                      />
-                      <div className={styles.formGroup}>
-                        <label>Icon Shade</label>
-                        <select 
-                          value={iconPatternShade}
-                          onChange={(e) => setIconPatternShade(Number(e.target.value))}
-                          className={styles.select}
-                        >
-                          <option value={-25}>Dark</option>
-                          <option value={28}>Light</option>
-                        </select>
-                      </div>
-                      
-                      <div className={styles.formGroup}>
-                        <label>Secondary Icon</label>
-                        <IconSearch
-                          setSelectedIconName={setSecondaryIconName}
-                          setSelectedIconVersion={setSecondaryIconVersion}
-                          pack={selectedIconType.startsWith("local:") ? "lucide" : "google"}
-                        />
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
+                        {/* Pattern settings have been moved to the right panel */}
       </div>
         </aside>
 
@@ -752,12 +730,12 @@ export default function Home() {
             {/* Right Controls Panel */}
             <div className={styles.quickControls}>
               <div className={styles.quickControlsHeader}>
-                <h3>⚡ Controls</h3>
+                <h3>Controls</h3>
               </div>
 
               {/* Size & Type */}
               <div className={styles.quickSection}>
-                <h4>📐 Size & Type</h4>
+                <h4>Size & Type</h4>
                 <div className={styles.formGroup}>
                   <label>Cover Type</label>
                   <select 
@@ -820,9 +798,57 @@ export default function Home() {
                 )}
               </div>
 
+              {/* Pattern Settings - Only shown when icon pattern is selected */}
+              {coverType === "iconpattern" && (
+                <div className={styles.quickSection}>
+                  <h4>Pattern Settings</h4>
+                  <SliderControl
+                    label="Spacing"
+                    value={iconPatternSpacing}
+                    onChange={setIconPatternSpacing}
+                    min={20}
+                    max={80}
+                    onReset={() => setIconPatternSpacing(25)}
+                    resetValue={25}
+                  />
+                  <SliderControl
+                    label="Size"
+                    value={iconPatternSize}
+                    onChange={setIconPatternSize}
+                    min={1}
+                    max={30}
+                    onReset={() => setIconPatternSize(2)}
+                    resetValue={2}
+                  />
+                  <SliderControl
+                    label="Rotation"
+                    value={iconPatternRotation}
+                    onChange={setIconPatternRotation}
+                    min={0}
+                    max={360}
+                    unit="°"
+                    onReset={() => setIconPatternRotation(330)}
+                    resetValue={330}
+                  />
+                  <div className={styles.formGroup}>
+                    <label>Icon Shade</label>
+                    <select 
+                      value={iconPatternShade}
+                      onChange={(e) => setIconPatternShade(Number(e.target.value))}
+                      className={styles.select}
+                    >
+                      <option value={-25}>Dark</option>
+                      <option value={28}>Light</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {/* Text Section */}
+
               {/* Text Section */}
               <div className={styles.quickSection}>
-                <h4>✍️ Text</h4>
+                <h4>Text</h4>
                 <div className={styles.formGroup}>
                   <label>Title Text</label>
                   <input 
@@ -853,8 +879,8 @@ export default function Home() {
                       min={12}
                       max={160}
                       unit="px"
-                      onReset={() => setTitleSize(64)}
-                      resetValue={64}
+                      onReset={() => setTitleSize(48)}
+                      resetValue={48}
                     />
 
                     <SliderControl
@@ -886,7 +912,7 @@ export default function Home() {
 
               {/* Effects Section */}
               <div className={styles.quickSection}>
-                <h4>✨ Effects</h4>
+                <h4>Effects</h4>
                 <div className={styles.effectsGrid}>
                   {/* Shape Overlay */}
                   <div className={styles.effectCard}>
@@ -894,7 +920,6 @@ export default function Home() {
                       label="Shape Overlay" 
                       enabled={shapeEnabled} 
                       onChange={setShapeEnabled}
-                      icon="🔳"
                     />
                     {shapeEnabled && (
                       <div className={styles.effectControls}>
@@ -944,7 +969,6 @@ export default function Home() {
                       label="Noise Texture" 
                       enabled={noiseEnabled} 
                       onChange={setNoiseEnabled}
-                      icon="📺"
                     />
                     {noiseEnabled && (
                       <div className={styles.effectControls}>
@@ -974,7 +998,6 @@ export default function Home() {
                       label="Soft Shadow" 
                       enabled={softShadowEnabled} 
                       onChange={setSoftShadowEnabled}
-                      icon="🌫️"
                     />
                     {softShadowEnabled && (
                       <div className={styles.effectControls}>
@@ -1004,7 +1027,6 @@ export default function Home() {
                       label="Border" 
                       enabled={borderEnabled} 
                       onChange={setBorderEnabled}
-                      icon="🔲"
                     />
                     {borderEnabled && (
                       <div className={styles.effectControls}>
@@ -1043,7 +1065,6 @@ export default function Home() {
                       label="Glass Panel" 
                       enabled={glassEnabled} 
                       onChange={setGlassEnabled}
-                      icon="🔍"
                     />
                     {glassEnabled && (
                       <div className={styles.effectControls}>
